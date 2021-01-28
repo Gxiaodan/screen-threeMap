@@ -70,11 +70,24 @@ export default class ThreeMap {
     );
   }
 
+  // 页面固定label添加
+  mapFixedLabel(data) {
+    for (let i = 0; i < data.length; i++) {
+      let item = data[i];
+      let labelDiv = document.getElementById(item.id);
+      const labelCon = new CSS2DObject(labelDiv);
+      let pos = this.lnglatToMector(item.coordinates);
+      labelCon.position.set(pos[0], pos[1], pos[2] + 0.2);
+      this.scene.add(labelCon);
+    }
+  }
+
   // 初始化辅助div
   initLabel() {
     // 总数值div
     this.totalDiv = document.getElementById("totalDiv");
     const totalCon = new CSS2DObject(this.totalDiv);
+    totalCon.position.set(10, -3, 17);
     this.scene.add(totalCon);
 
     // this.totalRenderer = new CSS2DRenderer();
@@ -84,10 +97,10 @@ export default class ThreeMap {
     // this.mapCon.appendChild(this.totalRenderer.domElement);
 
     // 获取页面上div
-    this.earthDiv = document.getElementById("testDiv");
-    this.earthLabel = new CSS2DObject(this.earthDiv);
-    this.earthLabel.visible = false;
-    this.scene.add(this.earthLabel);
+    this.dialogDiv = document.getElementById("dialogDiv");
+    this.dialogLabel = new CSS2DObject(this.dialogDiv);
+    this.dialogLabel.visible = false;
+    this.scene.add(this.dialogLabel);
 
     this.hoverDiv = document.getElementById("hoverDiv");
     this.Hoverabel = new CSS2DObject(this.hoverDiv);
@@ -153,7 +166,7 @@ export default class ThreeMap {
       } else if (type == "mouseup") {
         // 点击时选中信息清空
         // this.labelRenderer.domElement.style.display = "none";
-        this.earthLabel.visible = false;
+        this.dialogLabel.visible = false;
         this.Hoverabel.visible = false;
         // this.clearColor(this.group.children);
       }
@@ -202,9 +215,13 @@ export default class ThreeMap {
     const cpPos = p;
     // console.log(name, cpPos, "setPos==");
     if (type == "mouseup") {
-      // this.earthLabel.position.set( cpPos[0],cpPos[1],cpPos[2] );
-      this.earthLabel.position.set(cpPos.x, cpPos.y, cpPos.z - this.scenePos.z);
-      this.earthLabel.visible = true;
+      // this.dialogLabel.position.set( cpPos[0],cpPos[1],cpPos[2] );
+      this.dialogLabel.position.set(
+        cpPos.x,
+        cpPos.y,
+        cpPos.z - this.scenePos.z
+      );
+      this.dialogLabel.visible = true;
       console.log(g.data, "data========");
       console.log("mouseup========");
     } else {
@@ -545,7 +562,10 @@ export default class ThreeMap {
    * @desc 设置控制器
    */
   setControl() {
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls = new OrbitControls(
+      this.camera,
+      this.labelRenderer.domElement
+    );
     // this.controls.enabled = false;
     this.controls.update();
   }

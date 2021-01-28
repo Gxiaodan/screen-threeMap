@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div id="canvas_content" />
-    <div id="testDiv">
+    <div id="dialogDiv">
       <div>省份&nbsp;:&nbsp;&nbsp;&nbsp;{{ provinceName }}</div>
     </div>
     <div id="hoverDiv">
@@ -12,6 +12,7 @@
         <countTo :startVal='startVal' :endVal='endVal' :duration='6000'></countTo>
       </div>
     </div>
+    <div v-for="(label, index) in labelDatas" :key="index" :id="label.id" class="fixed-label">{{label.name}}</div>
   </div>
 </template>
 <script>
@@ -30,26 +31,32 @@ export default {
       startVal: 0,
       endVal: 0,
       provinceName: '',
-      datas: [
-        { name: '海南省', value: 60 },
-        { name: '北京市', value: 100 },
-        { name: '山东省', value: 80 },
-        { name: '海南省', value: 100 },
-        { name: '四川省', value: 100 },
-        { name: '台湾', value: 70 },
-        { name: '黑龙江省', value: 80 },
-        { name: '湖北省', value: 70 },
-        { name: '内蒙古自治区', value: 50 },
-        { name: '西藏自治区', value: 50 },
+      labelDatas: [
+        { name: '北京', value: 100, coordinates:[116.405285, 39.904989], id: "110000"},
+        { name: '乌鲁木齐', value: 63, coordinates:[87.617733, 43.792818], id: "650000"},
+        { name: '西安', value: 83, coordinates:[108.948024, 34.263161], id: "610000"},
+        { name: '上海', value: 73, coordinates:[121.472644, 31.231706], id: "310000"}
+      ],
+       datas: [
+        // { name: '海南省', value: 60 },
+        { name: '北京市', value: 100,  },
+        // { name: '山东省', value: 80 },
+        // { name: '海南省', value: 100 },
+        // { name: '四川省', value: 100 },
+        // { name: '台湾', value: 70 },
+        // { name: '黑龙江省', value: 80 },
+        // { name: '湖北省', value: 70 },
+        // { name: '内蒙古自治区', value: 50 },
+        // { name: '西藏自治区', value: 50 },
         { name: '新疆维吾尔自治区', value: 63 },
-        { name: '甘肃省', value: 63 },
+        // { name: '甘肃省', value: 63 },
         { name: '陕西省', value: 83 },
         { name: '上海市', value: 73 },
-        { name: '福建省', value: 63 },
-        { name: '广东省', value: 53 },
-        { name: '云南省', value: 43 },
-        { name: '辽宁省', value: 63 },
-        { name: '青海省', value: 90 }
+        // { name: '福建省', value: 63 },
+        // { name: '广东省', value: 53 },
+        // { name: '云南省', value: 43 },
+        // { name: '辽宁省', value: 63 },
+        // { name: '青海省', value: 90 }
       ],
       flyDatas: [
         // { source: { name: '海南省' }, target: { name: '四川省' }, value: 100 },
@@ -99,6 +106,7 @@ export default {
           map.setLabelPos(g, 'mouseup', p)
         }
       })
+      map.mapFixedLabel(_this.labelDatas)
 
       // 绘制光柱
       map.drawLightBar(_this.datas)
@@ -127,8 +135,8 @@ export default {
     width: 600px;
     height: 200px;
     // background: #146279;
-    left: 0px;
-    top: -400px;
+    // left: 0px;
+    // top: -400px;
     .num-con{
       font-size: 80px;
       font-weight: bold;
