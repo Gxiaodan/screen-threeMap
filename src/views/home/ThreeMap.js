@@ -14,7 +14,7 @@ import {
 
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 import { Reflector } from "three/examples/jsm/objects/Reflector.js";
-import lineImg from "../../../public/assets/images/line.png";
+import lineImg from "../../../public/assets/images/zdcs_icon.png";
 // import { GeometryUtils } from 'three/examples/jsm/utils/GeometryUtils';
 // 初始化一个场景
 export default class ThreeMap {
@@ -37,8 +37,8 @@ export default class ThreeMap {
     // this.scene.background = new THREE.Color("#c3b194");
     this.camera = new THREE.PerspectiveCamera(
       10,
-      // window.innerWidth / (window.innerHeight),
-      window.innerWidth / (window.innerHeight - 500),
+      // window.innerWidth / window.innerHeight,
+      window.innerWidth / (window.innerHeight - 600),
       1,
       1000
     );
@@ -72,12 +72,21 @@ export default class ThreeMap {
 
   // 页面固定label添加
   mapFixedLabel(data) {
+    const arrowTexture = new THREE.TextureLoader().load(lineImg);
+    const material = new THREE.SpriteMaterial({
+      map: arrowTexture,
+      color: 0xffffff,
+    });
+    const arrow = new THREE.Sprite(material);
+    arrow.position.set(0, 0, 5);
+    this.scene.add(arrow);
+
     for (let i = 0; i < data.length; i++) {
       let item = data[i];
       let labelDiv = document.getElementById(item.id);
       const labelCon = new CSS2DObject(labelDiv);
       let pos = this.lnglatToMector(item.coordinates);
-      labelCon.position.set(pos[0], pos[1], pos[2] + 0.2);
+      labelCon.position.set(pos[0], pos[1], pos[2] + 1.1);
       this.scene.add(labelCon);
     }
   }
@@ -268,14 +277,12 @@ export default class ThreeMap {
     // groundMirror.position.z = -2;
     // groundMirror.rotateX( - Math.PI / 2 );
     // 加入场景
-    const material = new THREE.MeshBasicMaterial({
-      map: new THREE.TextureLoader().load("./11.jpg"),
-      transparent: true,
-      opacity: 0.7,
-      // lights: false,
-      // side: THREE.DoubleSide
-    });
-    const mesh = new THREE.Mesh(mirGeometry, material);
+    // const material = new THREE.MeshBasicMaterial({
+    //   map: new THREE.TextureLoader().load("./11.jpg"),
+    //   transparent: true,
+    //   opacity: 0.7,
+    // });
+    // const mesh = new THREE.Mesh(mirGeometry, material);
     // mesh.position.z = 0;
     // this.scene.add(mesh);
     // this.scene.add(groundMirror);
@@ -304,6 +311,7 @@ export default class ThreeMap {
 
     // 绘制地图模型
     const group = new THREE.Group();
+    group.name = "mapGroup";
     this.mapData.features.forEach((d) => {
       const g = new THREE.Group(); // 用于存放每个地图模块。||省份
       g.data = d;
@@ -314,7 +322,7 @@ export default class ThreeMap {
             const mesh = this.drawModel(
               p,
               ["#006de0", "rgba(166,222,222,0.6)"],
-              0.6,
+              0.8,
               0
             );
             g.add(mesh);
@@ -324,7 +332,7 @@ export default class ThreeMap {
           const mesh = this.drawModel(
             points,
             ["#006de0", "rgba(166,222,222,0.6)"],
-            0.6,
+            0.8,
             0
           );
           g.add(mesh);
@@ -332,47 +340,47 @@ export default class ThreeMap {
       });
       group.add(g);
     });
-    const group1 = new THREE.Group();
-    this.mapData.features.forEach((d) => {
-      const g = new THREE.Group(); // 用于存放每个地图模块。||省份
-      g.data = d;
-      d.vector3.forEach((points) => {
-        // 多个面
-        if (points[0][0] instanceof Array) {
-          points.forEach((p) => {
-            const mesh = this.drawModel(
-              p,
-              ["#006de0", "rgba(166,222,222,0.6)"],
-              0.6,
-              0
-            );
-            g.add(mesh);
-          });
-        } else {
-          // 单个面
-          const mesh = this.drawModel(
-            points,
-            ["#006de0", "rgba(166,222,222,0.6)"],
-            0.6,
-            0
-          );
-          g.add(mesh);
-        }
-      });
-      group1.add(g);
-    });
+    // const group1 = new THREE.Group();
+    // this.mapData.features.forEach((d) => {
+    //   const g = new THREE.Group(); // 用于存放每个地图模块。||省份
+    //   g.data = d;
+    //   d.vector3.forEach((points) => {
+    //     // 多个面
+    //     if (points[0][0] instanceof Array) {
+    //       points.forEach((p) => {
+    //         const mesh = this.drawModel(
+    //           p,
+    //           ["#006de0", "rgba(166,222,222,0.6)"],
+    //           0.6,
+    //           0
+    //         );
+    //         g.add(mesh);
+    //       });
+    //     } else {
+    //       // 单个面
+    //       const mesh = this.drawModel(
+    //         points,
+    //         ["#006de0", "rgba(166,222,222,0.6)"],
+    //         0.6,
+    //         0
+    //       );
+    //       g.add(mesh);
+    //     }
+    //   });
+    //   group1.add(g);
+    // });
 
     this.group = group; // 丢到全局去
     const lineGroup = this.drawLineGroup(this.mapData.features, "#00fff5", 2); // 'rgba(234,128,58,0.3)'
     lineGroup.position.z = 1;
     this.scene.add(lineGroup);
-    const lineGroupBottom = this.drawLineGroup(
-      this.mapData.features,
-      "rgba(255,255,255,0.2)",
-      1
-    );
+    // const lineGroupBottom = this.drawLineGroup(
+    //   this.mapData.features,
+    //   "rgba(255,255,255,0.2)",
+    //   1
+    // );
     // const lineGroupBottom = lineGroup.clone();
-    lineGroupBottom.position.z = -0.1;
+    // lineGroupBottom.position.z = -0.1;
     // this.scene.add(lineGroupBottom);
     this.scene.add(this.group);
     // this.scene.add(group1);
@@ -383,6 +391,7 @@ export default class ThreeMap {
   */
   drawLineGroup(features, color, width) {
     const lineGroup = new THREE.Group();
+    lineGroup.name = "lineGroup";
     this.textureGroup = [];
     features.forEach((d, index) => {
       d.vector3.forEach((points) => {
@@ -396,7 +405,7 @@ export default class ThreeMap {
           if (p) {
             const lineMesh = this.drawLine(p, color, width);
             lineGroup.add(lineMesh);
-            const lineAniMesh = this.drawLineAnimate(p, width);
+            // const lineAniMesh = this.drawLineAnimate(p, width);
             // lineGroup.add(lineAniMesh);
           }
           // });
@@ -404,7 +413,7 @@ export default class ThreeMap {
           // 单个面
           const lineMesh = this.drawLine(points, color, width);
           lineGroup.add(lineMesh);
-          const lineAniMesh = this.drawLineAnimate(points, width);
+          // const lineAniMesh = this.drawLineAnimate(points, width);
           // lineGroup.add(lineAniMesh);
         }
       });
@@ -497,11 +506,17 @@ export default class ThreeMap {
     });
     var img2 = "./mapLine.png";
     const material = new THREE.MeshPhongMaterial({
-      color: colors[0],
-      // map: new THREE.TextureLoader().load("./11.jpg"),
+      // color: colors[0],
+      //tietu13  ceshi  Z2
+      map: new THREE.TextureLoader().load("./Z2.png"),
       transparent: true,
       opacity: opacity,
     });
+    // const material = new THREE.MeshBasicMaterial({
+    //   color: colors[0],
+    //   transparent: true,
+    //   opacity: opacity,
+    // });
     const material1 = new THREE.MeshBasicMaterial({
       map: new THREE.TextureLoader().load(img2),
       transparent: true,
@@ -593,9 +608,9 @@ export default class ThreeMap {
     pointLight.position.set(-50, -15, 50);
     directionalLight.position.set(-20, -10, 30);
     // this.scene.add(pointLight);
-    this.scene.add(directionalLight);
+    // this.scene.add(directionalLight);
     var point2 = new THREE.PointLight(0xffffff);
-    point2.position.set(100, 50, 100); // 点光源位置
+    point2.position.set(0, 0, 100); // 点光源位置
     this.scene.add(point2); // 点光源添加到场景中
 
     // this.scene.add(new THREE.HemisphereLight(0xff0000, 0x000000)); // 半球光
@@ -617,6 +632,12 @@ export default class ThreeMap {
     this.renderer.domElement.style.position = "absolute";
     // this.renderer.physicallyCorrectLights = true;
     this.mapCon.appendChild(this.renderer.domElement);
+
+    // var tri = new THREE.ShaderPass(THREE.TriangleBlurShader, "texture");
+    // tri.enabled = false;
+    // var composer = new THREE.EffectComposer(this.renderer);
+    // composer.addPass(tri);
+    // composer.render();
   }
 
   /**

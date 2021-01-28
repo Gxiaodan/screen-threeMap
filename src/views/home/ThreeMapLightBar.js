@@ -77,6 +77,9 @@ export default class ThreeMapLightBar extends ThreeMap {
     if (this.colorIndex > this.pointsLength - 1) {
       this.colorIndex = 0;
     }
+    // this.testMesh.rotateZ(Math.PI / 2);
+    // this.testMesh.rotateZ(0.05);
+    // this.testMesh.rotation.z = (this.colorIndex * Math.PI) / 5;
   }, 30);
 
   /**
@@ -142,7 +145,9 @@ export default class ThreeMapLightBar extends ThreeMap {
    */
   drawLightBar(data, type) {
     const group = new THREE.Group();
+    group.name = "六边体";
     const sixLineGroup = new THREE.Group();
+    sixLineGroup.name = "六边线";
     data.forEach((d, i) => {
       const lnglat = this.dataKeys[d.name];
       const [x, y, z] = this.lnglatToMector(lnglat);
@@ -151,6 +156,39 @@ export default class ThreeMapLightBar extends ThreeMap {
       group.add(this.drawSixMesh(x, y, z, i));
       // 绘制6边线
       sixLineGroup.add(this.drawSixLineLoop(x, y, z, i));
+
+      // const shape = new THREE.Shape();
+      // shape.moveTo(0, 0);
+      // shape.lineTo(0, 5);
+      // shape.lineTo(5, 5);
+      // shape.lineTo(5, 0);
+      // shape.lineTo(0, 0);
+
+      // const geometry = new THREE.ExtrudeGeometry(shape, {
+      //   amount: 1, // 拉伸长度，默认100
+      //   bevelEnabled: false, // 对挤出的形状应用是否斜角
+      //   depth: 2,
+      // });
+      // var img2 = "./mapLine.png";
+      // const material0 = new THREE.MeshPhongMaterial({
+      //   color: "#f00",
+      //   transparent: true,
+      //   opacity: 1,
+      // });
+      // const material1 = new THREE.MeshBasicMaterial({
+      //   map: new THREE.TextureLoader().load(img2),
+      //   transparent: true,
+      //   opacity: 1,
+      //   side: THREE.DoubleSide,
+      // });
+      // this.testMesh = new THREE.Mesh(geometry, [material0, material1]);
+      // this.testMesh.position.set(0, 10, 5);
+
+      // const geometry1 = new THREE.SphereGeometry(3, 3, 3);
+      // let mesh = new THREE.Mesh(geometry1, material0);
+      // mesh.position.x = -10;
+      // mesh.position.y = 10;
+      // this.scene.add(mesh);
 
       // 绘制柱子
       const [plane1, plane2] = this.drawPlane(x, y, z, d.value, i);
@@ -174,6 +212,7 @@ export default class ThreeMapLightBar extends ThreeMap {
    */
   drawFlyLine(data) {
     const group = new THREE.Group();
+    group.name = "飞线";
     const maxValue = Math.max(...data.map((item) => item.value));
     data.forEach((d) => {
       // 源和目标省份的经纬度
