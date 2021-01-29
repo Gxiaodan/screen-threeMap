@@ -506,7 +506,7 @@ export default class ThreeMap {
     // });
     let sideTexture = new THREE.TextureLoader().load("./mapLine.png");
     sideTexture.wrapS = sideTexture.wrapT = THREE.RepeatWrapping;
-    sideTexture.repeat.set(0.008, 0.008);
+    // sideTexture.repeat.set(0.008, 0.008);
     const material1 = new THREE.MeshStandardMaterial({
       map: sideTexture,
       transparent: true,
