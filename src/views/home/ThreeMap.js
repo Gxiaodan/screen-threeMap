@@ -20,6 +20,8 @@ import lineImg from "../../../public/assets/images/zdcs_icon.png";
 export default class ThreeMap {
   constructor(set) {
     this.provinceName = "";
+    this.isControl = true;
+    this.isFirst = true;
     this.mapData = set.mapData;
     this.mapColors = ["#0684fd", "#006de0"];
     this.init();
@@ -72,14 +74,21 @@ export default class ThreeMap {
 
   // 页面固定label添加
   mapFixedLabel(data) {
-    const arrowTexture = new THREE.TextureLoader().load(lineImg);
-    const material = new THREE.SpriteMaterial({
-      map: arrowTexture,
-      color: 0xffffff,
-    });
-    const arrow = new THREE.Sprite(material);
-    arrow.position.set(0, 0, 5);
-    this.scene.add(arrow);
+    // const arrowTexture = new THREE.TextureLoader().load(lineImg);
+    // const material = new THREE.SpriteMaterial({
+    //   map: arrowTexture,
+    //   color: 0xffffff,
+    // });
+    // const arrow = new THREE.Sprite(material);
+    // arrow.position.set(0, 0, 5);
+    // this.scene.add(arrow);
+    // const geometry = new THREE.BoxGeometry(6, 6, 6);
+    // const materialb = new THREE.MeshStandardMaterial({
+    //   map: new THREE.TextureLoader().load("./mapLine.png"),
+    // });
+    // let box = new THREE.Mesh(geometry, materialb);
+    // box.position.set(0, 5, 10);
+    // this.scene.add(box);
 
     for (let i = 0; i < data.length; i++) {
       let item = data[i];
@@ -89,6 +98,7 @@ export default class ThreeMap {
       labelCon.position.set(pos[0], pos[1], pos[2] + 1.1);
       this.scene.add(labelCon);
     }
+    this.labelRenderer.render(this.scene, this.camera);
   }
 
   // 初始化辅助div
@@ -98,12 +108,6 @@ export default class ThreeMap {
     const totalCon = new CSS2DObject(this.totalDiv);
     totalCon.position.set(10, -3, 17);
     this.scene.add(totalCon);
-
-    // this.totalRenderer = new CSS2DRenderer();
-    // this.totalRenderer.setSize(window.innerWidth, window.innerHeight);
-    // this.totalRenderer.domElement.style.position = "absolute";
-    // this.totalRenderer.domElement.style.top = "0px";
-    // this.mapCon.appendChild(this.totalRenderer.domElement);
 
     // 获取页面上div
     this.dialogDiv = document.getElementById("dialogDiv");
@@ -322,7 +326,7 @@ export default class ThreeMap {
             const mesh = this.drawModel(
               p,
               ["#006de0", "rgba(166,222,222,0.6)"],
-              0.8,
+              1,
               0
             );
             g.add(mesh);
@@ -332,7 +336,7 @@ export default class ThreeMap {
           const mesh = this.drawModel(
             points,
             ["#006de0", "rgba(166,222,222,0.6)"],
-            0.8,
+            1,
             0
           );
           g.add(mesh);
@@ -340,35 +344,6 @@ export default class ThreeMap {
       });
       group.add(g);
     });
-    // const group1 = new THREE.Group();
-    // this.mapData.features.forEach((d) => {
-    //   const g = new THREE.Group(); // 用于存放每个地图模块。||省份
-    //   g.data = d;
-    //   d.vector3.forEach((points) => {
-    //     // 多个面
-    //     if (points[0][0] instanceof Array) {
-    //       points.forEach((p) => {
-    //         const mesh = this.drawModel(
-    //           p,
-    //           ["#006de0", "rgba(166,222,222,0.6)"],
-    //           0.6,
-    //           0
-    //         );
-    //         g.add(mesh);
-    //       });
-    //     } else {
-    //       // 单个面
-    //       const mesh = this.drawModel(
-    //         points,
-    //         ["#006de0", "rgba(166,222,222,0.6)"],
-    //         0.6,
-    //         0
-    //       );
-    //       g.add(mesh);
-    //     }
-    //   });
-    //   group1.add(g);
-    // });
 
     this.group = group; // 丢到全局去
     const lineGroup = this.drawLineGroup(this.mapData.features, "#00fff5", 2); // 'rgba(234,128,58,0.3)'
@@ -382,7 +357,10 @@ export default class ThreeMap {
     // const lineGroupBottom = lineGroup.clone();
     // lineGroupBottom.position.z = -0.1;
     // this.scene.add(lineGroupBottom);
+    // this.group.position.z = 2;
     this.scene.add(this.group);
+    // var group1 = this.group.clone(); //克隆网格模型
+    // group1.position.z = 0;
     // this.scene.add(group1);
   }
 
@@ -401,7 +379,7 @@ export default class ThreeMap {
             return pre.length > current.length ? pre : current;
           });
           // let maxLen = Math.max(...points.map(item => item.length))
-          // points.forEach(p => {
+          // points.forEach((p) => {
           if (p) {
             const lineMesh = this.drawLine(p, color, width);
             lineGroup.add(lineMesh);
@@ -504,24 +482,36 @@ export default class ThreeMap {
       bevelEnabled: false, // 对挤出的形状应用是否斜角
       depth: 2,
     });
-    var img2 = "./mapLine.png";
-    const material = new THREE.MeshPhongMaterial({
+    var img2 = "./Z2.png";
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load(img2);
+
+    // it's necessary to apply these settings in order to correctly display the texture on a shape geometry
+
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(0.008, 0.008);
+
+    const material = new THREE.MeshStandardMaterial({
       // color: colors[0],
-      //tietu13  ceshi  Z2
-      map: new THREE.TextureLoader().load("./Z2.png"),
+      //tietu13  ceshi  Z2 test1.jpg
+      map: texture,
       transparent: true,
       opacity: opacity,
     });
+    //MeshPhongMaterial
     // const material = new THREE.MeshBasicMaterial({
     //   color: colors[0],
     //   transparent: true,
     //   opacity: opacity,
     // });
-    const material1 = new THREE.MeshBasicMaterial({
-      map: new THREE.TextureLoader().load(img2),
+    let sideTexture = new THREE.TextureLoader().load("./mapLine.png");
+    sideTexture.wrapS = sideTexture.wrapT = THREE.RepeatWrapping;
+    sideTexture.repeat.set(0.008, 0.008);
+    const material1 = new THREE.MeshStandardMaterial({
+      map: sideTexture,
       transparent: true,
-      opacity: 1,
-      side: THREE.DoubleSide,
+      opacity: opacity,
+      // side: THREE.DoubleSide,
     });
     const mesh = new THREE.Mesh(geometry, [material, material1]);
     mesh.position.z = zIndex;
@@ -565,10 +555,11 @@ export default class ThreeMap {
     // required if controls.enableDamping or controls.autoRotate are set to true
     this.controls.update();
     // console.log(this.camera);
-
-    this.labelRenderer.render(this.scene, this.camera);
     this.renderer.render(this.scene, this.camera);
-    // this.totalRenderer.render(this.scene, this.camera);
+    if ((!this.isControl && this.isFirst) || this.isControl) {
+      this.labelRenderer.render(this.scene, this.camera);
+      this.isFirst = false;
+    }
     // this.labelControls.update();
     this.doAnimate && this.doAnimate.bind(this)();
   }
@@ -581,7 +572,7 @@ export default class ThreeMap {
       this.camera,
       this.labelRenderer.domElement
     );
-    // this.controls.enabled = false;
+    this.controls.enabled = this.isControl;
     this.controls.update();
   }
 
@@ -610,7 +601,7 @@ export default class ThreeMap {
     // this.scene.add(pointLight);
     // this.scene.add(directionalLight);
     var point2 = new THREE.PointLight(0xffffff);
-    point2.position.set(0, 0, 100); // 点光源位置
+    point2.position.set(100, 50, 100); // 点光源位置
     this.scene.add(point2); // 点光源添加到场景中
 
     // this.scene.add(new THREE.HemisphereLight(0xff0000, 0x000000)); // 半球光
@@ -632,7 +623,6 @@ export default class ThreeMap {
     this.renderer.domElement.style.position = "absolute";
     // this.renderer.physicallyCorrectLights = true;
     this.mapCon.appendChild(this.renderer.domElement);
-
     // var tri = new THREE.ShaderPass(THREE.TriangleBlurShader, "texture");
     // tri.enabled = false;
     // var composer = new THREE.EffectComposer(this.renderer);
