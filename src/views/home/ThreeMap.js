@@ -270,7 +270,7 @@ export default class ThreeMap {
     const HEIGHT = window.innerHeight;
     // 圆形镜子
     // mirGeometry = new THREE.CircleGeometry(50, 4);
-    mirGeometry = new THREE.BoxGeometry(WIDTH, HEIGHT);
+    mirGeometry = new THREE.BoxBufferGeometry(WIDTH, HEIGHT);
     // 镜子参数
     const groundMirror = new Reflector(mirGeometry, {
       clipBias: 0.003,
@@ -451,7 +451,7 @@ export default class ThreeMap {
       pointList.push(new THREE.Vector3(x, y, z + 0.1));
     });
     const curve = new THREE.CatmullRomCurve3(pointList);
-    const geometry = new THREE.TubeGeometry(
+    const geometry = new THREE.TubeBufferGeometry(
       curve,
       Math.ceil(points.length * 1.5),
       0.1
@@ -477,7 +477,7 @@ export default class ThreeMap {
       }
     });
 
-    const geometry = new THREE.ExtrudeGeometry(shape, {
+    const geometry = new THREE.ExtrudeBufferGeometry(shape, {
       amount: 1, // 拉伸长度，默认100
       bevelEnabled: false, // 对挤出的形状应用是否斜角
       depth: 2,
