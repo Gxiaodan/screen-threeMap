@@ -18,11 +18,13 @@
 <script>
 import * as THREE from 'three'
 import './index.less'
-
+import topImg from '@/assets/img/top.png'
+import sideImg from '@/assets/img/side.png'
 import ThreeMapLightBar from './ThreeMapLightBar.js'
 import ThreeMap from './ThreeMap.js'
 import { util } from './util'
 import countTo from 'vue-count-to';
+
 export default {
   name: 'ThreeMap',
   components: {countTo},
@@ -38,49 +40,16 @@ export default {
         { name: '上海', value: 73, coordinates:[121.472644, 31.231706], id: "310000"}
       ],
        datas: [
-        // { name: '海南省', value: 60 },
         { name: '北京市', value: 100,  },
-        // { name: '山东省', value: 80 },
-        // { name: '海南省', value: 100 },
-        // { name: '四川省', value: 100 },
-        // { name: '台湾', value: 70 },
-        // { name: '黑龙江省', value: 80 },
-        // { name: '湖北省', value: 70 },
-        // { name: '内蒙古自治区', value: 50 },
-        // { name: '西藏自治区', value: 50 },
         { name: '新疆维吾尔自治区', value: 63 },
-        // { name: '甘肃省', value: 63 },
         { name: '陕西省', value: 83 },
-        { name: '上海市', value: 73 },
-        // { name: '福建省', value: 63 },
-        // { name: '广东省', value: 53 },
-        // { name: '云南省', value: 43 },
-        // { name: '辽宁省', value: 63 },
-        // { name: '青海省', value: 90 }
+        { name: '上海市', value: 73 }
       ],
       flyDatas: [
-        // { source: { name: '海南省' }, target: { name: '四川省' }, value: 100 },
-        { source: { name: '北京市' }, target: { name: '四川省' }, value: 150 },
-        // { source: { name: '山东省' }, target: { name: '四川省' }, value: 120 },
-        // { source: { name: '台湾' }, target: { name: '四川省' }, value: 80 },
-        // { source: { name: '黑龙江省' }, target: { name: '四川省' }, value: 40 },
-        { source: { name: '陕西省' }, target: { name: '四川省' }, value: 60 },
-        {
-          source: { name: '上海市' },
-          target: { name: '四川省' },
-          value: 70
-        },
-        // {
-        //   source: { name: '西藏自治区' },
-        //   target: { name: '四川省' },
-        //   value: 10
-        // },
-        {
-          source: { name: '新疆维吾尔自治区' },
-          target: { name: '四川省' },
-          value: 200
-        },
-        // { source: { name: '青海省' }, target: { name: '四川省' }, value: 20 }
+        { source: { name: '北京市' }, curve: [{x: 3, y: 7, z: 10}, {x: 10, y: -3, z: 14}], value: 150 },
+        { source: { name: '陕西省' }, curve: [{x: 3, y: -7, z: 10}, {x: 10, y: -3, z: 14}], value: 60 },
+        { source: { name: '上海市' }, curve: [{x: 2, y: 15, z: 10}, {x: 10, y: -3, z: 14}], value: 70 },
+        { source: { name: '新疆维吾尔自治区' }, curve: [{x: -15, y: -25, z: 6}, {x: 10, y: -3, z: 14}], value: 200}
       ]
     }
   },
@@ -92,7 +61,45 @@ export default {
       const mapData = util.decode(dataJson)
       console.log(mapData)
       // _this.initMap(jsonData)
-      const map = new ThreeMapLightBar({ mapData })
+      const map = new ThreeMapLightBar({ 
+        mapData, 
+        canvasId: "canvas_content",
+        scenePos:{ x: 0, y: 0, z: -8 },
+        cameraConfig: {
+          fov: 10,
+          aspect: window.innerWidth / (window.innerHeight - 600),
+          near: 1,
+          far: 1000,
+          pos: { x: 190, y: 40, z: 50 }
+        },
+        helperConfig: { isShow: true, length: 30 },
+        mirrorConfig: { isShow: false, zIndex: 0 },
+        modelConfig: {
+          topModel:{opacity: 1,map: topImg},
+          sideModel:{opacity: 1,map: sideImg},
+          zIndex: 0,
+          height: 1
+        },
+        lineConfig: {
+          color: '#00fff5',
+          width: 2,
+          opacity: 0.6,
+          zIndex: 1
+        },
+        lightConfig: {
+          point:{
+            pos:[100, 50, 100],
+            color: '#fff'
+          }
+        },
+        flyLineConfig: {
+          colors: ["rgb(245,127,127)", "rgb(255,0,0)", "rgb(245,127,127)"],
+          pointLength: 90,
+          moveLength: 30,
+          width: 1,
+          opacity:1
+        }
+      })
       
       _this.endVal = 18181116
       map.on('mouseFn', (e, g, p) => {

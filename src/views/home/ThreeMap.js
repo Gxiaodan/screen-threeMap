@@ -17,12 +17,96 @@ import { Reflector } from "three/examples/jsm/objects/Reflector.js";
 import lineImg from "../../../public/assets/images/zdcs_icon.png";
 // import { GeometryUtils } from 'three/examples/jsm/utils/GeometryUtils';
 // 初始化一个场景
+/**
+   * {
+    * canvasId: '', // canvasid
+    * scenePos: { x: 0, y: 0, z: -8 }, // 场景位置
+    * cameraConfig: { // camera配置
+          fov: 10,
+          aspect: window.innerWidth / (window.innerHeight - 600),
+          near: 1,
+          far: 1000,
+          pos: { x: 190, y: 40, z: 50 }
+        },
+    * helperConfig: { isShow: true, length: 20 }, // 辅助坐标轴配置
+    * mirrorConfig: { isShow: false, zIndex: 0 }, // 镜面配置
+    * modelConfig: { // 主体网格配置（顶部配置和侧边配置）
+    *   topModel:{opacity,color,map},
+    *   sideModel:{opacity,color,map},zIndex:0,height
+    * },
+    * lineConfig: {color,width,opacity,zIndex},
+    * lightConfig: {point:{pos:[],color}}
+  * }
+  * 
+  * eg:{ 
+        mapData, 
+        canvasId: "canvas_content",
+        scenePos:{ x: 0, y: 0, z: -8 },
+        cameraConfig: {
+          fov: 10,
+          aspect: window.innerWidth / (window.innerHeight - 600),
+          near: 1,
+          far: 1000,
+          pos: { x: 190, y: 40, z: 50 }
+        },
+        helperConfig: { isShow: true, length: 20 },
+        mirrorConfig: { isShow: false, zIndex: 0 },
+        modelConfig: {
+          topModel:{opacity: 1,map: topImg},
+          sideModel:{opacity: 1,map: sideImg},
+          zIndex: 0,
+          height: 1
+        },
+        lineConfig: {
+          color: '#fff',
+          width: 2,
+          opacity: 0.6,
+          zIndex: 1
+        },
+        lightConfig: {
+          point:{
+            pos:[100, 50, 100],
+            color: '#fff'
+          }
+        }
+      }
+  * 
+*/
 export default class ThreeMap {
   constructor(set) {
+    this.mapData = set.mapData;
+    this.canvasId = set.canvasId;
+    this.scenePos = set.scenePos || { x: 0, y: 0, z: -8 };
+    this.cameraConfig = set.cameraConfig || {
+      fov: 10,
+      aspect: window.innerWidth / (window.innerHeight - 600),
+      near: 1,
+      far: 1000,
+      pos: { x: 190, y: 40, z: 50 },
+    };
+    this.helperConfig = set.helperConfig || { isShow: true, length: 20 };
+    this.mirrorConfig = set.mirrorConfig || { isShow: false, zIndex: 0 };
+    this.modelConfig = set.modelConfig || {
+      topModel: { opacity: 1, map: "" },
+      sideModel: { opacity: 1, map: "" },
+      zIndex: 0,
+      height: 1,
+    };
+    this.lineConfig = set.lineConfig || {
+      color: "#fff",
+      width: 2,
+      opacity: 0.6,
+      zIndex: 1,
+    };
+    this.lightConfig = set.lightConfig || {
+      point: {
+        pos: [100, 50, 100],
+        color: "#fff",
+      },
+    };
     this.provinceName = "";
     this.isControl = true;
-    this.isFirst = true;
-    this.mapData = set.mapData;
+    this.isFirst = true; // 控制label是否在有动画但地图不可动的情况下是否渲染，节省性能
     this.mapColors = ["#0684fd", "#006de0"];
     this.init();
   }
@@ -31,28 +115,25 @@ export default class ThreeMap {
    * @desc 初始化场景
    */
   init() {
-    this.mapCon = document.getElementById("canvas_content");
+    this.mapCon = document.getElementById(this.canvasId);
     this.scene = new THREE.Scene();
-    this.scenePos = { x: 0, y: 0, z: -8 };
-    this.cameraPos = { x: 190, y: 40, z: 50 };
     this.scene.position.set(this.scenePos.x, this.scenePos.y, this.scenePos.z);
     // this.scene.background = new THREE.Color("#c3b194");
     this.camera = new THREE.PerspectiveCamera(
-      10,
-      // window.innerWidth / window.innerHeight,
-      window.innerWidth / (window.innerHeight - 600),
-      1,
-      1000
+      this.cameraConfig.fov,
+      this.cameraConfig.aspect,
+      this.cameraConfig.near,
+      this.cameraConfig.far
     );
     this.mousePos = null;
 
-    this.setCamera(this.cameraPos);
-    this.setLight();
+    this.setCamera(this.cameraConfig.pos);
+    this.setLight(this.lightConfig);
     this.setRender();
     this.initLabel();
 
     this.setHelper();
-
+    this.setMirror(this.mirrorConfig);
     this.drawMap();
 
     this.setControl();
@@ -258,39 +339,10 @@ export default class ThreeMap {
    * @desc 绘制地图
    */
   drawMap() {
-    // console.log(this.mapData);
     if (!this.mapData) {
       console.error("this.mapData 数据不能是null");
       return;
     }
-
-    // 设置镜子
-    let mirGeometry;
-    const WIDTH = window.innerWidth;
-    const HEIGHT = window.innerHeight;
-    // 圆形镜子
-    // mirGeometry = new THREE.CircleGeometry(50, 4);
-    mirGeometry = new THREE.BoxBufferGeometry(WIDTH, HEIGHT);
-    // 镜子参数
-    const groundMirror = new Reflector(mirGeometry, {
-      clipBias: 0.003,
-      textureWidth: WIDTH * window.devicePixelRatio,
-      textureHeight: HEIGHT * window.devicePixelRatio,
-      color: "#33338b",
-    });
-    // groundMirror.position.z = -2;
-    // groundMirror.rotateX( - Math.PI / 2 );
-    // 加入场景
-    // const material = new THREE.MeshBasicMaterial({
-    //   map: new THREE.TextureLoader().load("./11.jpg"),
-    //   transparent: true,
-    //   opacity: 0.7,
-    // });
-    // const mesh = new THREE.Mesh(mirGeometry, material);
-    // mesh.position.z = 0;
-    // this.scene.add(mesh);
-    // this.scene.add(groundMirror);
-
     // 把经纬度转换成x,y,z 坐标
     this.mapData.features.forEach((d) => {
       d.vector3 = [];
@@ -311,8 +363,6 @@ export default class ThreeMap {
       });
     });
 
-    // console.log(this.mapData);
-
     // 绘制地图模型
     const group = new THREE.Group();
     group.name = "mapGroup";
@@ -323,22 +373,12 @@ export default class ThreeMap {
         // 多个面
         if (points[0][0] instanceof Array) {
           points.forEach((p) => {
-            const mesh = this.drawModel(
-              p,
-              ["#006de0", "rgba(166,222,222,0.6)"],
-              1,
-              0
-            );
+            const mesh = this.drawModel(p);
             g.add(mesh);
           });
         } else {
           // 单个面
-          const mesh = this.drawModel(
-            points,
-            ["#006de0", "rgba(166,222,222,0.6)"],
-            1,
-            0
-          );
+          const mesh = this.drawModel(points);
           g.add(mesh);
         }
       });
@@ -346,14 +386,13 @@ export default class ThreeMap {
     });
 
     this.group = group; // 丢到全局去
-    const lineGroup = this.drawLineGroup(this.mapData.features, "#00fff5", 2); // 'rgba(234,128,58,0.3)'
-    lineGroup.position.z = 1;
+    const lineGroup = this.drawLineGroup(
+      this.mapData.features,
+      this.lineConfig.color,
+      this.lineConfig.width
+    );
+    lineGroup.position.z = this.lineConfig.zIndex;
     this.scene.add(lineGroup);
-    // const lineGroupBottom = this.drawLineGroup(
-    //   this.mapData.features,
-    //   "rgba(255,255,255,0.2)",
-    //   1
-    // );
     // const lineGroupBottom = lineGroup.clone();
     // lineGroupBottom.position.z = -0.1;
     // this.scene.add(lineGroupBottom);
@@ -412,7 +451,7 @@ export default class ThreeMap {
       linecap: "square", // 线两端的样式
       linejoin: "round", // 线连接节点的样式
       lights: false, // 材质是否受到光照的影响
-      opacity: 1,
+      opacity: this.lineConfig.opacity,
     });
     material.resolution.set(window.innerWidth, window.innerHeight);
     const geometry = new LineGeometry();
@@ -464,7 +503,7 @@ export default class ThreeMap {
   /**
    * @desc 绘制地图模型 points 是一个二维数组 [[x,y], [x,y], [x,y]]
    */
-  drawModel(points, colors, opacity, zIndex) {
+  drawModel(points) {
     const shape = new THREE.Shape();
     points.forEach((d, i) => {
       const [x, y] = d;
@@ -478,43 +517,34 @@ export default class ThreeMap {
     });
 
     const geometry = new THREE.ExtrudeBufferGeometry(shape, {
-      amount: 1, // 拉伸长度，默认100
+      amount: this.modelConfig.height, // 拉伸长度，默认100
       bevelEnabled: false, // 对挤出的形状应用是否斜角
       depth: 2,
     });
-    var img2 = "./Z2.png";
     const loader = new THREE.TextureLoader();
-    const texture = loader.load(img2);
+    const texture = loader.load(this.modelConfig.topModel.map);
 
     // it's necessary to apply these settings in order to correctly display the texture on a shape geometry
 
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(0.008, 0.008);
-
     const material = new THREE.MeshStandardMaterial({
       // color: colors[0],
-      //tietu13  ceshi  Z2 test1.jpg
       map: texture,
       transparent: true,
-      opacity: opacity,
+      opacity: this.modelConfig.topModel.opacity,
     });
-    //MeshPhongMaterial
-    // const material = new THREE.MeshBasicMaterial({
-    //   color: colors[0],
-    //   transparent: true,
-    //   opacity: opacity,
-    // });
-    let sideTexture = new THREE.TextureLoader().load("./mapLine.png");
+    let sideTexture = new THREE.TextureLoader().load(
+      this.modelConfig.sideModel.map
+    );
     sideTexture.wrapS = sideTexture.wrapT = THREE.RepeatWrapping;
-    // sideTexture.repeat.set(0.008, 0.008);
     const material1 = new THREE.MeshStandardMaterial({
       map: sideTexture,
       transparent: true,
-      opacity: opacity,
-      // side: THREE.DoubleSide,
+      opacity: this.modelConfig.sideModel.opacity,
     });
     const mesh = new THREE.Mesh(geometry, [material, material1]);
-    mesh.position.z = zIndex;
+    mesh.position.z = this.modelConfig.zIndex;
     return mesh;
   }
 
@@ -591,7 +621,7 @@ export default class ThreeMap {
   /**
    * @desc 设置光线
    */
-  setLight() {
+  setLight(config) {
     const directionalLight = new THREE.DirectionalLight(0xff0000, 1); // 平行光
     const pointLight = new THREE.PointLight(0xff0000); // 点光源
     pointLight.castShadow = true;
@@ -600,9 +630,12 @@ export default class ThreeMap {
     directionalLight.position.set(-20, -10, 30);
     // this.scene.add(pointLight);
     // this.scene.add(directionalLight);
-    var point2 = new THREE.PointLight(0xffffff);
-    point2.position.set(100, 50, 100); // 点光源位置
-    this.scene.add(point2); // 点光源添加到场景中
+    if (config.point) {
+      var point = new THREE.PointLight(config.point.color);
+      let pos = config.point.pos;
+      point.position.set(pos[0], pos[1], pos[2]); // 点光源位置
+      this.scene.add(point); // 点光源添加到场景中
+    }
 
     // this.scene.add(new THREE.HemisphereLight(0xff0000, 0x000000)); // 半球光
 
@@ -634,7 +667,41 @@ export default class ThreeMap {
    * @desc 设置参考线
    */
   setHelper() {
-    const axesHelper = new THREE.AxisHelper(20);
-    this.scene.add(axesHelper);
+    if (this.helperConfig.isShow) {
+      const axesHelper = new THREE.AxisHelper(this.helperConfig.length);
+      axesHelper.position.z = 1;
+      this.scene.add(axesHelper);
+    }
+  }
+
+  setMirror(mirrorConfig) {
+    // 设置镜子
+    if (mirrorConfig.isShow) {
+      let mirGeometry;
+      const WIDTH = window.innerWidth;
+      const HEIGHT = window.innerHeight;
+      // 圆形镜子
+      // mirGeometry = new THREE.CircleGeometry(50, 4);
+      mirGeometry = new THREE.BoxBufferGeometry(WIDTH, HEIGHT);
+      // 镜子参数
+      const groundMirror = new Reflector(mirGeometry, {
+        clipBias: 0.003,
+        textureWidth: WIDTH * window.devicePixelRatio,
+        textureHeight: HEIGHT * window.devicePixelRatio,
+        color: "#33338b",
+      });
+      groundMirror.position.z = mirrorConfig.zIndex;
+      // groundMirror.rotateX( - Math.PI / 2 );
+      // 加入场景
+      // const material = new THREE.MeshBasicMaterial({
+      //   map: new THREE.TextureLoader().load("./11.jpg"),
+      //   transparent: true,
+      //   opacity: 0.7,
+      // });
+      // const mesh = new THREE.Mesh(mirGeometry, material);
+      // mesh.position.z = 0;
+      // this.scene.add(mesh);
+      this.scene.add(groundMirror);
+    }
   }
 }

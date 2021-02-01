@@ -10,19 +10,34 @@ import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 
 import { util } from "./util";
 
-// const THREE = window.THREE;
+/**
+   *flyLineConfig: {
+      colors: ["rgb(245,127,127)", "rgb(255,0,0)", "rgb(245,127,127)"],
+      pointLength: 90,// 控制流光速度;控制飞线分段数量；流光长度等属性
+      moveLength: 30,
+      width: 1,
+      opacity:1
+    }
+   * 
+  */
 export default class ThreeMapLightBar extends ThreeMap {
   constructor(set) {
     super(set);
+    this.flyLineConfig = set.flyLineConfig || {
+      colors: ["rgb(245,127,127)", "rgb(255,0,0)", "rgb(245,127,127)"],
+      pointLength: 90,
+      moveLength: 30,
+      width: 1,
+      opacity: 1,
+    };
     this.dataKeys = {};
     this.setDataKeys();
-    this.colors = ["#fff", "#ff0", "#0f0"];
+    this.colors = ["#fff", "#ff0"];
     this.colorIndex = 0;
     this.textures = [
       new THREE.TextureLoader().load(img1),
       new THREE.TextureLoader().load(img2),
     ];
-    this.pointsLength = 70; // 控制流光速度;控制飞线分段数量；流光长度等属性
   }
 
   // 设置键值
@@ -39,30 +54,23 @@ export default class ThreeMapLightBar extends ThreeMap {
    * @desc 节流，防抖
    */
   doAnimate = throttle(() => {
-    const ratio = this.colorIndex / this.pointsLength;
+    const ratio = this.colorIndex / this.flyLineConfig.pointLength;
     this.flyGroup &&
       this.flyGroup.children.forEach((d) => {
         let colorList = [];
         // let value = d.userData.value
         // let max = d.userData.max
         colorList = util.getRgb(
-          ["rgb(245,170,170)", "rgb(255,0,0)", "rgb(245,170,170)"],
-          this.pointsLength
+          this.flyLineConfig.colors,
+          this.flyLineConfig.pointLength
         );
         const color = new THREE.Color("#fff");
-        colorList.splice(
-          this.colorIndex * 3,
-          9,
-          color.r,
-          color.g,
-          color.b,
-          color.r,
-          color.g,
-          color.b,
-          color.r,
-          color.g,
-          color.b
-        );
+        let moveLength = this.flyLineConfig.moveLength;
+        let rgbArr = [];
+        for (let i = 0; i < Math.ceil(moveLength / 3); i++) {
+          rgbArr.push(color.r, color.g, color.b);
+        }
+        colorList.splice(this.colorIndex * 3, moveLength, ...rgbArr);
         d.geometry.setColors(colorList);
         d.geometry.colorsNeedUpdate = true;
       });
@@ -74,7 +82,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       });
 
     this.colorIndex++;
-    if (this.colorIndex > this.pointsLength - 1) {
+    if (this.colorIndex > this.flyLineConfig.pointLength - 1) {
       this.colorIndex = 0;
     }
     // this.testMesh.rotateZ(Math.PI / 2);
@@ -209,6 +217,11 @@ export default class ThreeMapLightBar extends ThreeMap {
 
   /**
    * @desc 绘制飞线
+   * flyLineConfig: {
+   *  color: ["rgb(245,127,127)", "rgb(255,0,0)", "rgb(245,127,127)"],
+   * opacity: 1,
+   *
+   * }
    */
   drawFlyLine(data) {
     const group = new THREE.Group();
@@ -217,22 +230,31 @@ export default class ThreeMapLightBar extends ThreeMap {
     data.forEach((d) => {
       // 源和目标省份的经纬度
       const slnglat = this.dataKeys[d.source.name];
-      const tlnglat = this.dataKeys[d.target.name];
       const value = d.value;
-      const z = 15;
+      const z = 10;
       const [x1, y1, z1] = this.lnglatToMector(slnglat);
-      const [x2, y2, z2] = this.lnglatToMector(tlnglat);
-      const curve = new THREE.QuadraticBezierCurve3(
-        new THREE.Vector3(x1, y1, z1 + 1.1),
-        new THREE.Vector3((x1 + x2) / 2, (y1 + y2) / 2 + 5, 10),
-        new THREE.Vector3(10, -3, 14)
-      );
-      const points = curve.getPoints(this.pointsLength);
+      let x2, y2, z2;
+      let curve;
+      if (d.target) {
+        const tlnglat = this.dataKeys[d.target.name];
+        [x2, y2, z2] = this.lnglatToMector(tlnglat);
+        curve = new THREE.QuadraticBezierCurve3(
+          new THREE.Vector3(x1, y1, z1 + 1.1),
+          new THREE.Vector3((x1 + x2) / 2, (y1 + y2) / 2, z),
+          new THREE.Vector3(x2, y2, z2 + 1.1)
+        );
+      } else
+        curve = new THREE.QuadraticBezierCurve3(
+          new THREE.Vector3(x1, y1, z1 + 1.1),
+          new THREE.Vector3(d.curve[0].x, d.curve[0].y, d.curve[0].z),
+          new THREE.Vector3(d.curve[1].x, d.curve[1].y, d.curve[1].z)
+        );
+      const points = curve.getPoints(this.flyLineConfig.pointLength);
       const geometry = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
       // geometry.vertices = points;
       const positions = [];
-      const colorList = [];
-      points.forEach((p, i) => {
+      // const colorList = [];
+      points.forEach((p) => {
         positions.push(p.x, p.y, p.z);
         //  let color = new THREE.Color("#f00");
         // let color = new THREE.Color(0xffffff);
@@ -241,10 +263,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       });
       geometry.setPositions(positions);
       geometry.setColors(
-        util.getRgb(
-          ["rgb(245,127,127)", "rgb(255,0,0)", "rgb(245,127,127)"],
-          this.pointsLength
-        )
+        util.getRgb(this.flyLineConfig.colors, this.flyLineConfig.pointLength)
       );
 
       const material = new LineMaterial({
@@ -252,10 +271,10 @@ export default class ThreeMapLightBar extends ThreeMap {
         // color: 0xffffff,
         vertexColors: true, // 是否使用顶点着色 THREE.NoColors THREE.VertexColors THREE.FaceColors
         transparent: true,
-        linewidth: 1,
+        linewidth: this.flyLineConfig.width,
         linecap: "square", // 线两端的样式
         linejoin: "round", // 线连接节点的样式
-        opacity: 1,
+        opacity: this.flyLineConfig.opacity,
         lights: false, // 材质是否受到光照的影响
         // clipShadows: true,
         // shadowSide: THREE.DoubleSide
