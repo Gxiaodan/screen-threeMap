@@ -88,7 +88,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     // this.testMesh.rotateZ(Math.PI / 2);
     // this.testMesh.rotateZ(0.05);
     // this.testMesh.rotation.z = (this.colorIndex * Math.PI) / 5;
-  }, 30);
+  }, this.animateConfig.time);
 
   /**
    * @desc 绘制6边形

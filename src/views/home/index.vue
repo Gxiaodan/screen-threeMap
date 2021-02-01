@@ -95,9 +95,12 @@ export default {
         flyLineConfig: {
           colors: ["rgb(245,127,127)", "rgb(255,0,0)", "rgb(245,127,127)"],
           pointLength: 90,
-          moveLength: 30,
+          moveLength: 9,
           width: 1,
           opacity:1
+        },
+        animateConfig: {
+          time: 30
         }
       })
       

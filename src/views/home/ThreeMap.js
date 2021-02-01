@@ -36,6 +36,10 @@ import lineImg from "../../../public/assets/images/zdcs_icon.png";
     * },
     * lineConfig: {color,width,opacity,zIndex},
     * lightConfig: {point:{pos:[],color}}
+    * 
+      animateConfig: {
+        time: 30
+      }
   * }
   * 
   * eg:{ 
@@ -103,6 +107,9 @@ export default class ThreeMap {
         pos: [100, 50, 100],
         color: "#fff",
       },
+    };
+    this.animateConfig = set.animateConfig || {
+      time: 30,
     };
     this.provinceName = "";
     this.isControl = true;
