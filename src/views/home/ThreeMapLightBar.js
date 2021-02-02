@@ -4,6 +4,7 @@ import img2 from "../../../public/assets/images/lightray_yellow.jpg";
 import throttle from "lodash.throttle";
 
 import * as THREE from "three";
+import { Reflector } from "three/examples/jsm/objects/Reflector.js";
 import { Line2 } from "three/examples/jsm/lines/Line2";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
@@ -38,17 +39,31 @@ export default class ThreeMapLightBar extends ThreeMap {
       new THREE.TextureLoader().load(img1),
       new THREE.TextureLoader().load(img2),
     ];
-    this.drawBorderLine();
+
+    let _this = this;
+    new THREE.FileLoader().load("./assets/map/chinaBorderLine.json", function(
+      data
+    ) {
+      const borderData = JSON.parse(data);
+      _this.drawBorderMesh(borderData);
+      // _this.drawBorderLine(borderData, "#f00", 2);
+    });
   }
 
   // 设置键值
   setDataKeys() {
     this.mapData.features.forEach((d) => {
+      // const { name, center } = d.properties;
+      // if (name) this.dataKeys[name] = [...center];
       const { name, cp } = d.properties;
-      this.dataKeys[name] = [...cp];
+      if (name) this.dataKeys[name] = [...cp];
+    });
+    this.labelDatas.forEach((d) => {
+      const { coordinates, name } = d;
+      this.dataKeys[name] = [...coordinates];
     });
 
-    console.log(this.dataKeys);
+    console.log(this.dataKeys, "++++++++++++++");
   }
 
   /**
@@ -290,14 +305,77 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.scene.add(group);
   }
 
-  drawBorderLine() {
-    new THREE.FileLoader().load("./assets/map/chinaBorderLine.json", function(
-      data
-    ) {
-      const borderData = JSON.parse(data);
-      this.coordinatesTrans(data);
-      debugger;
-      console.log(borderData);
+  drawBorderMesh(borderData) {
+    // 边界线和平面
+    this.coordinatesTrans(borderData);
+    let d = borderData.features[0];
+    const shape = new THREE.Shape();
+    let lintPoints = [];
+    let meshGroup = new THREE.Group();
+
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load(this.modelConfig.topModel.map);
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(1, 0.01);
+    texture.offset.set(0, 0.6);
+    texture.rotation = -80;
+    const material = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      opacity: 0.7,
     });
+
+    d.vector3.forEach((points) => {
+      points.forEach((point) => {
+        lintPoints.push(...point);
+        const mesh = this.drawBorderModel(point);
+        meshGroup.add(mesh);
+      });
+    });
+
+    meshGroup.position.z = this.modelConfig.height;
+
+    this.scene.add(meshGroup);
+
+    lintPoints.forEach((d, i) => {
+      let [x, y] = d;
+      if (i === 0) {
+        shape.moveTo(x, y);
+      } else if (i === lintPoints.length - 1) {
+        shape.quadraticCurveTo(x, y, x, y);
+      } else {
+        shape.lineTo(x, y);
+      }
+    });
+
+    const geometry = new THREE.ExtrudeBufferGeometry(shape, {
+      amount: 0.01, // 拉伸长度，默认100
+      bevelEnabled: false, // 对挤出的形状应用是否斜角
+    });
+    const groundMirror = new Reflector(geometry, {
+      clipBias: 0.003,
+    });
+
+    const borderMesh = new THREE.Mesh(geometry, material);
+
+    borderMesh.position.z = this.modelConfig.height;
+    groundMirror.position.z = 0;
+    groundMirror.position.x = 1;
+    // this.scene.add(groundMirror);
+    // this.scene.add(borderMesh);
+  }
+  drawBorderLine(borderData, color, width) {
+    this.coordinatesTrans(borderData);
+    let lineGroup = borderData.features[0];
+    const g = new THREE.Group(); // 用于存放每个地图模块。||省份
+    g.name = "边界线";
+    lineGroup.vector3.forEach((points) => {
+      points.forEach((p) => {
+        const lineMesh = this.drawLine(p, color, width);
+        g.add(lineMesh);
+      });
+    });
+    g.position.z = this.modelConfig.height + 0.01;
+    this.scene.add(g);
   }
 }
