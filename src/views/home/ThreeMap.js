@@ -64,8 +64,7 @@ import lineImg from "../../../public/assets/images/zdcs_icon.png";
         lineConfig: {
           color: '#fff',
           width: 2,
-          opacity: 0.6,
-          zIndex: 1
+          opacity: 0.6
         },
         lightConfig: {
           point:{
@@ -93,14 +92,12 @@ export default class ThreeMap {
     this.modelConfig = set.modelConfig || {
       topModel: { opacity: 1, map: "" },
       sideModel: { opacity: 1, map: "" },
-      zIndex: 0,
       height: 1,
     };
     this.lineConfig = set.lineConfig || {
       color: "#fff",
       width: 2,
       opacity: 0.6,
-      zIndex: 1,
     };
     this.lightConfig = set.lightConfig || {
       point: {
@@ -341,17 +338,9 @@ export default class ThreeMap {
       this.clickFunction = func;
     }
   }
-
-  /**
-   * @desc 绘制地图
-   */
-  drawMap() {
-    if (!this.mapData) {
-      console.error("this.mapData 数据不能是null");
-      return;
-    }
-    // 把经纬度转换成x,y,z 坐标
-    this.mapData.features.forEach((d) => {
+  // 把经纬度转换成x,y,z 坐标
+  coordinatesTrans(data) {
+    data.features.forEach((d) => {
       d.vector3 = [];
       d.geometry.coordinates.forEach((coordinates, i) => {
         d.vector3[i] = [];
@@ -369,7 +358,17 @@ export default class ThreeMap {
         });
       });
     });
+  }
 
+  /**
+   * @desc 绘制地图
+   */
+  drawMap() {
+    if (!this.mapData) {
+      console.error("this.mapData 数据不能是null");
+      return;
+    }
+    this.coordinatesTrans(this.mapData);
     // 绘制地图模型
     const group = new THREE.Group();
     group.name = "mapGroup";
@@ -398,7 +397,7 @@ export default class ThreeMap {
       this.lineConfig.color,
       this.lineConfig.width
     );
-    lineGroup.position.z = this.lineConfig.zIndex;
+    lineGroup.position.z = this.modelConfig.height;
     this.scene.add(lineGroup);
     // const lineGroupBottom = lineGroup.clone();
     // lineGroupBottom.position.z = -0.1;
@@ -526,7 +525,7 @@ export default class ThreeMap {
     const geometry = new THREE.ExtrudeBufferGeometry(shape, {
       amount: this.modelConfig.height, // 拉伸长度，默认100
       bevelEnabled: false, // 对挤出的形状应用是否斜角
-      depth: 2,
+      // depth: 2,
     });
     const loader = new THREE.TextureLoader();
     const texture = loader.load(this.modelConfig.topModel.map);
@@ -534,8 +533,10 @@ export default class ThreeMap {
     // it's necessary to apply these settings in order to correctly display the texture on a shape geometry
 
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(0.008, 0.008);
-    const material = new THREE.MeshStandardMaterial({
+    texture.repeat.set(1, 0.01);
+    texture.offset.set(0, 0.6);
+    texture.rotation = -80;
+    const material = new THREE.MeshBasicMaterial({
       // color: colors[0],
       map: texture,
       transparent: true,
@@ -545,13 +546,17 @@ export default class ThreeMap {
       this.modelConfig.sideModel.map
     );
     sideTexture.wrapS = sideTexture.wrapT = THREE.RepeatWrapping;
+    // sideTexture.rotation = -175;
+    // sideTexture.offset.set(0, 0.5);
+    // sideTexture.center.set(0.5, 0.5);
+    // sideTexture.repeat.set(1, 0.5);
     const material1 = new THREE.MeshStandardMaterial({
       map: sideTexture,
       transparent: true,
       opacity: this.modelConfig.sideModel.opacity,
     });
     const mesh = new THREE.Mesh(geometry, [material, material1]);
-    mesh.position.z = this.modelConfig.zIndex;
+    mesh.position.z = 0;
     return mesh;
   }
 
@@ -591,7 +596,7 @@ export default class ThreeMap {
     requestAnimationFrame(this.animate.bind(this));
     // required if controls.enableDamping or controls.autoRotate are set to true
     this.controls.update();
-    // console.log(this.camera);
+    console.log(this.camera);
     this.renderer.render(this.scene, this.camera);
     if ((!this.isControl && this.isFirst) || this.isControl) {
       this.labelRenderer.render(this.scene, this.camera);
@@ -697,7 +702,7 @@ export default class ThreeMap {
         textureHeight: HEIGHT * window.devicePixelRatio,
         color: "#33338b",
       });
-      groundMirror.position.z = mirrorConfig.zIndex;
+      groundMirror.position.z = 0;
       // groundMirror.rotateX( - Math.PI / 2 );
       // 加入场景
       // const material = new THREE.MeshBasicMaterial({

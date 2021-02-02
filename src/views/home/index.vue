@@ -73,34 +73,32 @@ export default {
           pos: { x: 190, y: 40, z: 50 }
         },
         helperConfig: { isShow: true, length: 30 },
-        mirrorConfig: { isShow: false, zIndex: 0 },
+        mirrorConfig: { isShow: false},
         modelConfig: {
-          topModel:{opacity: 1,map: topImg},
+          topModel:{opacity: 0.8,map: topImg},
           sideModel:{opacity: 1,map: sideImg},
-          zIndex: 0,
           height: 1
         },
         lineConfig: {
           color: '#00fff5',
           width: 2,
-          opacity: 0.6,
-          zIndex: 1
+          opacity: 0.6
         },
         lightConfig: {
           point:{
-            pos:[100, 50, 100],
+            pos:[100, 20, 50],
             color: '#fff'
           }
         },
         flyLineConfig: {
           colors: ["rgb(245,127,127)", "rgb(255,0,0)", "rgb(245,127,127)"],
           pointLength: 90,
-          moveLength: 9,
+          moveLength: 15,
           width: 1,
           opacity:1
         },
         animateConfig: {
-          time: 30
+          time: 20
         }
       })
       

@@ -38,6 +38,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       new THREE.TextureLoader().load(img1),
       new THREE.TextureLoader().load(img2),
     ];
+    this.drawBorderLine();
   }
 
   // 设置键值
@@ -287,5 +288,16 @@ export default class ThreeMapLightBar extends ThreeMap {
     });
     this.flyGroup = group;
     this.scene.add(group);
+  }
+
+  drawBorderLine() {
+    new THREE.FileLoader().load("./assets/map/chinaBorderLine.json", function(
+      data
+    ) {
+      const borderData = JSON.parse(data);
+      this.coordinatesTrans(data);
+      debugger;
+      console.log(borderData);
+    });
   }
 }
