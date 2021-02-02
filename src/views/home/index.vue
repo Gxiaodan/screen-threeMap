@@ -34,10 +34,13 @@ export default {
       endVal: 0,
       provinceName: '',
       labelDatas: [
-        { name: '北京', value: 100, coordinates:[116.405285, 39.904989], id: "110000"},
-        { name: '乌鲁木齐', value: 63, coordinates:[87.617733, 43.792818], id: "650000"},
-        { name: '西安', value: 83, coordinates:[108.948024, 34.263161], id: "610000"},
-        { name: '上海', value: 73, coordinates:[121.472644, 31.231706], id: "310000"}
+        { name: '北京', value: 100, coordinates:[116.405285, 39.904989], id: "label-001"},
+        { name: '徐州', value: 100, coordinates:[117.2, 34.26], id: "label-002"},
+        { name: '遵义', value: 100, coordinates:[116.9, 27.7], id: "label-003"},
+        { name: '和田', value: 100, coordinates:[79.94, 37.12], id: "label-004"},
+        { name: '杭州', value: 100, coordinates:[120.19, 30.26], id: "label-005"},
+        { name: '西安', value: 83, coordinates:[108.948024, 34.263161], id: "label-006"},
+        { name: '上海', value: 73, coordinates:[121.472644, 31.231706], id: "label-007"}
       ],
        datas: [
         { name: '北京市', value: 100,  },
@@ -46,10 +49,13 @@ export default {
         { name: '上海市', value: 73 }
       ],
       flyDatas: [
-        { source: { name: '北京市' }, curve: [{x: 3, y: 7, z: 10}, {x: 10, y: -3, z: 14}], value: 150 },
-        { source: { name: '陕西省' }, curve: [{x: 3, y: -7, z: 10}, {x: 10, y: -3, z: 14}], value: 60 },
-        { source: { name: '上海市' }, curve: [{x: 2, y: 15, z: 10}, {x: 10, y: -3, z: 14}], value: 70 },
-        { source: { name: '新疆维吾尔自治区' }, curve: [{x: -15, y: -25, z: 6}, {x: 10, y: -3, z: 14}], value: 200}
+        { source: { name: '北京' }, curve: [{x: 3, y: 7, z: 10}, {x: 10, y: -3, z: 14}], value: 150 },
+        { source: { name: '西安' }, curve: [{x: 3, y: -7, z: 10}, {x: 10, y: -3, z: 14}], value: 60 },
+        { source: { name: '上海' }, curve: [{x: 2, y: 15, z: 10}, {x: 10, y: -3, z: 14}], value: 70 },
+        { source: { name: '徐州' }, curve: [{x: 2, y: 15, z: 10}, {x: 10, y: -3, z: 14}], value: 70 },
+        { source: { name: '杭州' }, curve: [{x: 2, y: 15, z: 10}, {x: 10, y: -3, z: 14}], value: 70 },
+        { source: { name: '遵义' }, curve: [{x: 2, y: 10, z: 10}, {x: 10, y: -3, z: 14}], value: 70 },
+        { source: { name: '和田' }, curve: [{x: -15, y: -30, z: 6}, {x: 10, y: -3, z: 14}], value: 200}
       ]
     }
   },
@@ -59,10 +65,12 @@ export default {
     loader.load('./assets/map/china.json', function(data) {
       const dataJson = JSON.parse(data)
       const mapData = util.decode(dataJson)
+      // const mapData = JSON.parse(data)
       console.log(mapData)
       // _this.initMap(jsonData)
       const map = new ThreeMapLightBar({ 
         mapData, 
+        labelDatas: _this.labelDatas,
         canvasId: "canvas_content",
         scenePos:{ x: 0, y: 0, z: -8 },
         cameraConfig: {
@@ -73,9 +81,9 @@ export default {
           pos: { x: 190, y: 40, z: 50 }
         },
         helperConfig: { isShow: true, length: 30 },
-        mirrorConfig: { isShow: false},
+        mirrorConfig: { isShow: true},
         modelConfig: {
-          topModel:{opacity: 0.8,map: topImg},
+          topModel:{opacity: 0.5,map: topImg},
           sideModel:{opacity: 1,map: sideImg},
           height: 1
         },
@@ -114,10 +122,10 @@ export default {
           map.setLabelPos(g, 'mouseup', p)
         }
       })
-      map.mapFixedLabel(_this.labelDatas)
+      map.mapFixedLabel()
 
       // 绘制光柱
-      map.drawLightBar(_this.datas)
+      map.drawLightBar(_this.labelDatas)
 
       // 绘制线条
       map.drawFlyLine(_this.flyDatas)
