@@ -31,6 +31,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       width: 1,
       opacity: 1,
     };
+    this.borderLineConfig = set.borderLineConfig || { isShow: false };
     this.dataKeys = {};
     this.setDataKeys();
     this.colors = ["#fff", "#ff0"];
@@ -46,7 +47,6 @@ export default class ThreeMapLightBar extends ThreeMap {
     ) {
       const borderData = JSON.parse(data);
       _this.drawBorderMesh(borderData);
-      // _this.drawBorderLine(borderData, "#f00", 2);
     });
   }
 
@@ -302,80 +302,37 @@ export default class ThreeMapLightBar extends ThreeMap {
       group.add(mesh);
     });
     this.flyGroup = group;
-    this.scene.add(group);
+    // this.flyGroup.position.z = this.modelConfig.height + 0.1;
+    this.flyGroup.position.z = 0.1;
+    this.scene.add(this.flyGroup);
   }
 
   drawBorderMesh(borderData) {
     // 边界线和平面
     this.coordinatesTrans(borderData);
     let d = borderData.features[0];
-    const shape = new THREE.Shape();
-    let lintPoints = [];
     let meshGroup = new THREE.Group();
-
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load(this.modelConfig.topModel.map);
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(1, 0.01);
-    texture.offset.set(0, 0.6);
-    texture.rotation = -80;
-    const material = new THREE.MeshBasicMaterial({
-      map: texture,
-      transparent: true,
-      opacity: 0.7,
-    });
+    let mirrorGroup = new THREE.Group();
+    let lineGroup = new THREE.Group();
 
     d.vector3.forEach((points) => {
       points.forEach((point) => {
-        lintPoints.push(...point);
         const mesh = this.drawBorderModel(point);
+        const mirrorMesh = this.drawBorderModel(point, "mirror");
+        const lineMesh = this.drawLine(point, "#f00", 2);
+        lineGroup.add(lineMesh);
         meshGroup.add(mesh);
+        mirrorGroup.add(mirrorMesh);
       });
     });
 
-    meshGroup.position.z = this.modelConfig.height;
+    meshGroup.position.z = this.modelConfig.height + 0.01;
+    mirrorGroup.position.z = 0;
+    mirrorGroup.position.x = 1;
+    lineGroup.position.z = this.modelConfig.height + 0.2;
 
     this.scene.add(meshGroup);
-
-    lintPoints.forEach((d, i) => {
-      let [x, y] = d;
-      if (i === 0) {
-        shape.moveTo(x, y);
-      } else if (i === lintPoints.length - 1) {
-        shape.quadraticCurveTo(x, y, x, y);
-      } else {
-        shape.lineTo(x, y);
-      }
-    });
-
-    const geometry = new THREE.ExtrudeBufferGeometry(shape, {
-      amount: 0.01, // 拉伸长度，默认100
-      bevelEnabled: false, // 对挤出的形状应用是否斜角
-    });
-    const groundMirror = new Reflector(geometry, {
-      clipBias: 0.003,
-    });
-
-    const borderMesh = new THREE.Mesh(geometry, material);
-
-    borderMesh.position.z = this.modelConfig.height;
-    groundMirror.position.z = 0;
-    groundMirror.position.x = 1;
-    // this.scene.add(groundMirror);
-    // this.scene.add(borderMesh);
-  }
-  drawBorderLine(borderData, color, width) {
-    this.coordinatesTrans(borderData);
-    let lineGroup = borderData.features[0];
-    const g = new THREE.Group(); // 用于存放每个地图模块。||省份
-    g.name = "边界线";
-    lineGroup.vector3.forEach((points) => {
-      points.forEach((p) => {
-        const lineMesh = this.drawLine(p, color, width);
-        g.add(lineMesh);
-      });
-    });
-    g.position.z = this.modelConfig.height + 0.01;
-    this.scene.add(g);
+    if (this.mirrorConfig.isShow) this.scene.add(mirrorGroup);
+    if (this.borderLineConfig.isShow) this.scene.add(lineGroup);
   }
 }

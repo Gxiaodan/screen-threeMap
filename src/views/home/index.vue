@@ -49,13 +49,13 @@ export default {
         { name: '上海市', value: 73 }
       ],
       flyDatas: [
-        { source: { name: '北京' }, curve: [{x: 3, y: 7, z: 10}, {x: 10, y: -3, z: 14}], value: 150 },
-        { source: { name: '西安' }, curve: [{x: 3, y: -7, z: 10}, {x: 10, y: -3, z: 14}], value: 60 },
-        { source: { name: '上海' }, curve: [{x: 2, y: 15, z: 10}, {x: 10, y: -3, z: 14}], value: 70 },
-        { source: { name: '徐州' }, curve: [{x: 2, y: 15, z: 10}, {x: 10, y: -3, z: 14}], value: 70 },
-        { source: { name: '杭州' }, curve: [{x: 2, y: 15, z: 10}, {x: 10, y: -3, z: 14}], value: 70 },
-        { source: { name: '遵义' }, curve: [{x: 2, y: 10, z: 10}, {x: 10, y: -3, z: 14}], value: 70 },
-        { source: { name: '和田' }, curve: [{x: -15, y: -30, z: 6}, {x: 10, y: -3, z: 14}], value: 200}
+        { source: { name: '北京' }, curve: [{x: -10, y: 10, z: 25}, {x: -10, y: -3, z: 40}], value: 150 },
+        { source: { name: '西安' }, curve: [{x: 3, y: -7, z: 10}, {x: -10, y: -3, z: 40}], value: 60 },
+        { source: { name: '上海' }, curve: [{x: 2, y: 16, z: 30}, {x: -10, y: -3, z: 40}], value: 70 },
+        { source: { name: '徐州' }, curve: [{x: 2, y: 15, z: 10}, {x: -10, y: -3, z: 40}], value: 70 },
+        { source: { name: '杭州' }, curve: [{x: 2, y: 15, z: 10}, {x: -10, y: -3, z: 40}], value: 70 },
+        { source: { name: '遵义' }, curve: [{x: 2, y: 10, z: 10}, {x: -10, y: -3, z: 40}], value: 70 },
+        { source: { name: '和田' }, curve: [{x: -25, y: -40, z: 10}, {x: -10, y: -3, z: 40}], value: 200}
       ]
     }
   },
@@ -72,20 +72,21 @@ export default {
         mapData, 
         labelDatas: _this.labelDatas,
         canvasId: "canvas_content",
-        scenePos:{ x: 0, y: 0, z: -8 },
+        scenePos:{ x: 0, y: 0, z: -32.5 },
         cameraConfig: {
           fov: 10,
-          aspect: window.innerWidth / (window.innerHeight - 600),
+          aspect: window.innerWidth / (window.innerHeight),
           near: 1,
-          far: 1000,
-          pos: { x: 190, y: 40, z: 50 }
+          far: 100000,
+          pos: { x: 327, y: 42, z: 311 }
         },
-        helperConfig: { isShow: true, length: 30 },
-        mirrorConfig: { isShow: true},
+        helperConfig: { isShow: false, length: 30 },
+        mirrorConfig: { isShow: false},
+        borderLineConfig: { isShow: false},
         modelConfig: {
           topModel:{opacity: 0.5,map: topImg},
           sideModel:{opacity: 1,map: sideImg},
-          height: 1
+          height: 3
         },
         lineConfig: {
           color: '#00fff5',
@@ -125,7 +126,7 @@ export default {
       map.mapFixedLabel()
 
       // 绘制光柱
-      map.drawLightBar(_this.labelDatas)
+      // map.drawLightBar(_this.labelDatas)
 
       // 绘制线条
       map.drawFlyLine(_this.flyDatas)
@@ -150,7 +151,10 @@ export default {
   #totalDiv{
     width: 600px;
     height: 200px;
-    // background: #146279;
+    position: absolute;
+    left: 650px;
+    top: 200px;
+    background: #146279;
     // left: 0px;
     // top: -400px;
     .num-con{

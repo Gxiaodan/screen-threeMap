@@ -131,7 +131,7 @@ export default class ThreeMap {
       this.cameraConfig.far
     );
     this.mousePos = null;
-
+    this.camera.lookAt(0, 0, 0);
     this.setCamera(this.cameraConfig.pos);
     this.setLight(this.lightConfig);
     this.setRender();
@@ -189,10 +189,10 @@ export default class ThreeMap {
   // 初始化辅助div
   initLabel() {
     // 总数值div
-    this.totalDiv = document.getElementById("totalDiv");
-    const totalCon = new CSS2DObject(this.totalDiv);
-    totalCon.position.set(10, -3, 17);
-    this.scene.add(totalCon);
+    // this.totalDiv = document.getElementById("totalDiv");
+    // const totalCon = new CSS2DObject(this.totalDiv);
+    // totalCon.position.set(10, -3, 17);
+    // this.scene.add(totalCon);
 
     // 获取页面上div
     this.dialogDiv = document.getElementById("dialogDiv");
@@ -398,7 +398,7 @@ export default class ThreeMap {
       this.lineConfig.color,
       this.lineConfig.width
     );
-    lineGroup.position.z = this.modelConfig.height + 0.01;
+    lineGroup.position.z = this.modelConfig.height + 0.1;
     this.scene.add(lineGroup);
     // const lineGroupBottom = lineGroup.clone();
     // lineGroupBottom.position.z = -0.01;
@@ -510,12 +510,10 @@ export default class ThreeMap {
   /**
    * @desc 绘制地图模型 points 是一个二维数组 [[x,y], [x,y], [x,y]]
    */
-  drawBorderModel(points) {
+  drawBorderModel(points, type) {
     const shape = new THREE.Shape();
     points.forEach((d, i) => {
       let [x, y] = d;
-      // x = x + 1;
-      // y = y + 1;
       if (i === 0) {
         shape.moveTo(x, y);
       } else if (i === points.length - 1) {
@@ -524,28 +522,35 @@ export default class ThreeMap {
         shape.lineTo(x, y, x, y);
       }
     });
-
-    const geometry = new THREE.ExtrudeBufferGeometry(shape, {
-      amount: 0.01, // 拉伸长度，默认100
-      bevelEnabled: false, // 对挤出的形状应用是否斜角
-    });
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load(this.modelConfig.topModel.map);
-
-    // // it's necessary to apply these settings in order to correctly display the texture on a shape geometry
-
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(1, 0.01);
-    texture.offset.set(0, 0.6);
-    texture.rotation = -80;
-    const material = new THREE.MeshBasicMaterial({
-      map: texture,
-      transparent: true,
-      opacity: 0.7,
-    });
-    const mesh = new THREE.Mesh(geometry, material);
-
-    return mesh;
+    let geometry;
+    if (type == "mirror") {
+      geometry = new THREE.ExtrudeBufferGeometry(shape, {
+        amount: 0.01, // 拉伸长度，默认100
+        bevelEnabled: false, // 对挤出的形状应用是否斜角
+      });
+      const groundMirror = new Reflector(geometry, {
+        clipBias: 0.003,
+      });
+      return groundMirror;
+    } else {
+      geometry = new THREE.ExtrudeBufferGeometry(shape, {
+        amount: 0.01, // 拉伸长度，默认100
+        bevelEnabled: false, // 对挤出的形状应用是否斜角
+      });
+      const loader = new THREE.TextureLoader();
+      const texture = loader.load(this.modelConfig.topModel.map);
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(1, 0.01);
+      texture.offset.set(0, 0.6);
+      texture.rotation = -80;
+      const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        opacity: 0.7,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      return mesh;
+    }
   }
   drawModel(points) {
     const shape = new THREE.Shape();
@@ -563,7 +568,7 @@ export default class ThreeMap {
     const geometry = new THREE.ExtrudeBufferGeometry(shape, {
       amount: this.modelConfig.height, // 拉伸长度，默认100
       bevelEnabled: false, // 对挤出的形状应用是否斜角
-      depth: this.modelConfig.height,
+      depth: 1,
     });
     const loader = new THREE.TextureLoader();
     const texture = loader.load(this.modelConfig.topModel.map);
@@ -586,9 +591,9 @@ export default class ThreeMap {
     );
     sideTexture.wrapS = sideTexture.wrapT = THREE.RepeatWrapping;
     // sideTexture.rotation = -175;
-    // sideTexture.offset.set(0, 0.5);
+    sideTexture.offset.set(0, 1 - 1 / this.modelConfig.height);
     // sideTexture.center.set(0.5, 0.5);
-    // sideTexture.repeat.set(1, 0.5);
+    sideTexture.repeat.set(1, 1 / this.modelConfig.height);
     const material1 = new THREE.MeshBasicMaterial({
       map: sideTexture,
       depthTest: false,
@@ -637,7 +642,7 @@ export default class ThreeMap {
     requestAnimationFrame(this.animate.bind(this));
     // required if controls.enableDamping or controls.autoRotate are set to true
     this.controls.update();
-    // console.log(this.camera);
+    // console.log(this.camera, "camera");
     this.renderer.render(this.scene, this.camera);
     if ((!this.isControl && this.isFirst) || this.isControl) {
       this.labelRenderer.render(this.scene, this.camera);
@@ -655,6 +660,18 @@ export default class ThreeMap {
       this.camera,
       this.labelRenderer.domElement
     );
+    this.controls.enablePan = true; // 邮件拖拽
+    this.controls.enableZoom = true; // 滚轮缩放
+    this.controls.enableRotate = true; // 左键旋转
+    this.controls.minZoom = 0.5; // 缩放范围
+    this.controls.maxZoom = 2.0;
+    // // 上下旋转范围
+    // this.controls.minPolarAngle = Math.PI * (80 / 360);
+    // this.controls.maxPolarAngle = Math.PI * (1 - 230 / 360);
+    // // 左右旋转范围
+    // this.controls.minAzimuthAngle = Math.PI * (60 / 180);
+    // this.controls.maxAzimuthAngle = Math.PI * (120 / 180);
+
     this.controls.enabled = this.isControl;
     this.controls.update();
   }
