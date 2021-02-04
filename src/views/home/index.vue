@@ -1,5 +1,8 @@
 <template>
   <div class="container">
+    <video class="bgvid" id="bgvid" autoplay muted loop>
+      <source src="@/assets/img/bg.webm" type="video/webm" />
+    </video>
     <div id="canvas_content" />
     <div id="dialogDiv">
       <div>省份&nbsp;:&nbsp;&nbsp;&nbsp;{{ provinceName }}</div>
@@ -50,11 +53,11 @@ export default {
       ],
       flyDatas: [
         { source: { name: '北京' }, curve: [{x: -10, y: 10, z: 25}, {x: -10, y: -3, z: 40}], value: 150 },
-        { source: { name: '西安' }, curve: [{x: 3, y: -7, z: 10}, {x: -10, y: -3, z: 40}], value: 60 },
+        { source: { name: '西安' }, curve: [{x: -3, y: -7, z: 10}, {x: -10, y: -3, z: 40}], value: 60 },
         { source: { name: '上海' }, curve: [{x: 2, y: 16, z: 30}, {x: -10, y: -3, z: 40}], value: 70 },
-        { source: { name: '徐州' }, curve: [{x: 2, y: 15, z: 10}, {x: -10, y: -3, z: 40}], value: 70 },
-        { source: { name: '杭州' }, curve: [{x: 2, y: 15, z: 10}, {x: -10, y: -3, z: 40}], value: 70 },
-        { source: { name: '遵义' }, curve: [{x: 2, y: 10, z: 10}, {x: -10, y: -3, z: 40}], value: 70 },
+        { source: { name: '徐州' }, curve: [{x: 2, y: 5, z: 30}, {x: -10, y: -3, z: 40}], value: 70 },
+        { source: { name: '杭州' }, curve: [{x: 2, y: 10, z: 30}, {x: -10, y: -3, z: 40}], value: 70 },
+        { source: { name: '遵义' }, curve: [{x: 2, y: 1, z: 10}, {x: -10, y: -3, z: 40}], value: 70 },
         { source: { name: '和田' }, curve: [{x: -25, y: -40, z: 10}, {x: -10, y: -3, z: 40}], value: 200}
       ]
     }
@@ -90,8 +93,8 @@ export default {
         },
         lineConfig: {
           color: '#00fff5',
-          width: 2,
-          opacity: 0.6
+          width: 1,
+          opacity: 1
         },
         lightConfig: {
           point:{
@@ -103,7 +106,7 @@ export default {
           colors: ["rgb(245,127,127)", "rgb(255,0,0)", "rgb(245,127,127)"],
           pointLength: 90,
           moveLength: 15,
-          width: 1,
+          width: 2,
           opacity:1
         },
         animateConfig: {
@@ -123,53 +126,16 @@ export default {
           map.setLabelPos(g, 'mouseup', p)
         }
       })
-      map.mapFixedLabel()
+      // map.mapFixedLabel()
 
       // 绘制光柱
       // map.drawLightBar(_this.labelDatas)
 
       // 绘制线条
-      map.drawFlyLine(_this.flyDatas)
+      // map.drawFlyLine(_this.flyDatas)
     })
   },
   created() {},
   methods: {}
 }
 </script>
-
-<style lang="less">
-
-.container{
-  width: 100%;
-  height: calc(100vh);
-  background: url('~@/assets/img/bg_img.jpg');
-  position: relative;
-
-  .canvas_content{
-    position: absolute;
-  }
-  #totalDiv{
-    width: 600px;
-    height: 200px;
-    position: absolute;
-    left: 650px;
-    top: 200px;
-    background: #146279;
-    // left: 0px;
-    // top: -400px;
-    .num-con{
-      font-size: 80px;
-      font-weight: bold;
-      text-align: center;
-      margin-top: 30px;
-      &>span{
-        display: block;
-        background-image: -webkit-linear-gradient(bottom, red, #fd8403, yellow);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        -webkit-box-reflect: below -40px -webkit-gradient(linear,left top,left bottom,from(rgba(0,0,0,0)),to(rgba(0,0,0, 0.5)));
-      }
-    }
-  }
-}
-</style>

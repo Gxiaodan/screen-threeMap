@@ -1,7 +1,10 @@
 h1{
   color: red;
 }
-
+@font-face {
+  font-family: CFChaoRan;
+  src: url('~@/assets/font/CFChaoRan-Noncommercial.ttf');
+}
 body{
   background: #000;
 }
@@ -24,4 +27,43 @@ body{
   color: #fff;
   background: url('~@/assets/img/zdcs_icon.png');
   background-size: contain;
+}
+
+
+.container{
+  width: 100%;
+  height: calc(100vh);
+  // background: url('~@/assets/img/bg_img.jpg');
+  position: relative;
+
+  #canvas_content{
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  #totalDiv{
+    width: 600px;
+    height: 200px;
+    position: absolute;
+    left: 650px;
+    top: 200px;
+    // background: #146279;
+    // left: 0px;
+    // top: -400px;
+    .num-con{
+      font-size: 80px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 30px;
+      font-family: 'CFChaoRan';
+      &>span{
+        display: block;
+        background-image: -webkit-linear-gradient(bottom, red, #fd8403, yellow);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        -webkit-box-reflect: below -40px -webkit-linear-gradient(top,transparent 40%,rgba(0,0,0, 0.7));
+
+      }
+    }
+  }
 }

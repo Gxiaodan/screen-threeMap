@@ -326,7 +326,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       });
     });
 
-    meshGroup.position.z = this.modelConfig.height + 0.01;
+    meshGroup.position.z = this.modelConfig.height + 0.1;
     mirrorGroup.position.z = 0;
     mirrorGroup.position.x = 1;
     lineGroup.position.z = this.modelConfig.height + 0.2;

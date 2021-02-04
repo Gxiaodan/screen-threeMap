@@ -6,6 +6,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Line2 } from "three/examples/jsm/lines/Line2";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import {
   CSS2DRenderer,
@@ -15,6 +17,7 @@ import {
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 import { Reflector } from "three/examples/jsm/objects/Reflector.js";
 import lineImg from "../../../public/assets/images/zdcs_icon.png";
+import { util } from "./util";
 // import { GeometryUtils } from 'three/examples/jsm/utils/GeometryUtils';
 // 初始化一个场景
 /**
@@ -122,8 +125,9 @@ export default class ThreeMap {
   init() {
     this.mapCon = document.getElementById(this.canvasId);
     this.scene = new THREE.Scene();
+    // this.scene.background = new THREE.Color("#7d547c");
+    // this.scene.fog = new THREE.Fog("#0f0", 480, 500);
     this.scene.position.set(this.scenePos.x, this.scenePos.y, this.scenePos.z);
-    // this.scene.background = new THREE.Color("#c3b194");
     this.camera = new THREE.PerspectiveCamera(
       this.cameraConfig.fov,
       this.cameraConfig.aspect,
@@ -143,6 +147,7 @@ export default class ThreeMap {
     this.setControl();
 
     this.animate();
+
     // this.lineAnimate()
     this.mapCon.addEventListener("mouseup", this.mouseEvent.bind(this), false);
     this.mapCon.addEventListener(
@@ -398,7 +403,7 @@ export default class ThreeMap {
       this.lineConfig.color,
       this.lineConfig.width
     );
-    lineGroup.position.z = this.modelConfig.height + 0.1;
+    lineGroup.position.z = this.modelConfig.height + 0.15;
     this.scene.add(lineGroup);
     // const lineGroupBottom = lineGroup.clone();
     // lineGroupBottom.position.z = -0.01;
@@ -540,13 +545,14 @@ export default class ThreeMap {
       const loader = new THREE.TextureLoader();
       const texture = loader.load(this.modelConfig.topModel.map);
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(1, 0.01);
-      texture.offset.set(0, 0.6);
+      texture.repeat.set(0.011, 0.01);
+      texture.offset.set(0.56, 0.62);
       texture.rotation = -80;
       const material = new THREE.MeshBasicMaterial({
         map: texture,
         transparent: true,
-        opacity: 0.7,
+        // side: THREE.DoubleSide,
+        opacity: 0.8,
       });
       const mesh = new THREE.Mesh(geometry, material);
       return mesh;
@@ -665,12 +671,14 @@ export default class ThreeMap {
     this.controls.enableRotate = true; // 左键旋转
     this.controls.minZoom = 0.5; // 缩放范围
     this.controls.maxZoom = 2.0;
-    // // 上下旋转范围
-    // this.controls.minPolarAngle = Math.PI * (80 / 360);
+    // 上下旋转范围
+    // this.controls.minPolarAngle = Math.PI * (90 / 360);
     // this.controls.maxPolarAngle = Math.PI * (1 - 230 / 360);
-    // // 左右旋转范围
-    // this.controls.minAzimuthAngle = Math.PI * (60 / 180);
-    // this.controls.maxAzimuthAngle = Math.PI * (120 / 180);
+    this.controls.minPolarAngle = 0;
+    this.controls.maxPolarAngle = Math.PI * (1 / 2);
+    // 左右旋转范围
+    this.controls.minAzimuthAngle = Math.PI * (70 / 180);
+    this.controls.maxAzimuthAngle = Math.PI * (120 / 180);
 
     this.controls.enabled = this.isControl;
     this.controls.update();
@@ -731,9 +739,10 @@ export default class ThreeMap {
     this.mapCon.appendChild(this.renderer.domElement);
     // var tri = new THREE.ShaderPass(THREE.TriangleBlurShader, "texture");
     // tri.enabled = false;
-    // var composer = new THREE.EffectComposer(this.renderer);
-    // composer.addPass(tri);
-    // composer.render();
+    // this.composer = new EffectComposer(this.renderer);
+    // const renderScene = new RenderPass(this.scene, this.camera);
+    // this.composer.addPass(renderScene);
+    // this.composer.render();
   }
 
   /**
