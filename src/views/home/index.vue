@@ -3,7 +3,18 @@
     <video class="bgvid" id="bgvid" autoplay muted loop>
       <source src="@/assets/img/bg.webm" type="video/webm" />
     </video>
-    <div id="canvas_content" />
+    <div class="main-con">
+      <div class="wheel-con">
+        <div v-for="(item, index) in wheelData" :key="index" class="sub-tit" :class="{'active': index == curIndex, 'lastActive': (index + 1) % wheelData.length == curIndex}">
+            <div v-if="index == curIndex || (index + 1) % wheelData.length == curIndex">
+              <span class="place" >{{item.place}}</span>
+              <span class="name">{{item.name}}</span>
+              <span class="time">{{item.time}}</span>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div id="canvas_content" >
     <div id="dialogDiv">
       <div>省份&nbsp;:&nbsp;&nbsp;&nbsp;{{ provinceName }}</div>
     </div>
@@ -12,10 +23,17 @@
     </div>
     <div id="totalDiv">
       <div class="num-con">
-        <countTo :startVal='startVal' :endVal='endVal' :duration='6000'></countTo>
+        <countTo :startVal='startVal' :endVal='endVal'></countTo>
+        <div class="unit">元</div>
       </div>
     </div>
-    <div v-for="(label, index) in labelDatas" :key="index" :id="label.id" class="fixed-label">{{label.name}}</div>
+    <div v-for="(label, index) in labelDatas" :key="index" :id="label.id" class="fixed-label">
+      <img src="@/assets/img/spanBg.png">
+      <!-- <img class="top_img" src="@/assets/img/spanBg.png"> -->
+      {{label.name}}
+    </div>
+    </div>
+    <!-- <div class="line-bg"></div> -->
   </div>
 </template>
 <script>
@@ -35,7 +53,17 @@ export default {
     return {
       startVal: 0,
       endVal: 0,
+      curIndex: 0,
       provinceName: '',
+      wheelData: [
+        { place: "西安市",   value: 3021896,   name: "高新区“一核四化”基层治理平台", time: "2020-07"},
+        { place: "杭州市",   value: 2163352,   name: "市域治理“一核四化”杭州项目", time: "2020-11"},
+        { place: "绍兴市",   value: 2092134,   name: "市域治理“一核四化”河桥项目", time: "2020-12"},
+        { place: "上海市",   value: 2000093,   name: "青浦区环意赛精准时空保障系统", time: "2020-06"},
+        { place: "和田市",   value: 2032612,   name: "新疆和田可视化系统", time: "2020-11"},
+        { place: "徐州市",   value: 3213510,   name: "徐州市“国潮”音乐节治安防控系统", time: "2020-11"},
+        { place: "遵义市",   value: 1512000,   name: "遵义社会治安防控实战应用平台", time: "2020-07"},
+      ],
       labelDatas: [
         { name: '北京', value: 100, coordinates:[116.405285, 39.904989], id: "label-001"},
         { name: '徐州', value: 100, coordinates:[117.2, 34.26], id: "label-002"},
@@ -52,13 +80,13 @@ export default {
         { name: '上海市', value: 73 }
       ],
       flyDatas: [
-        { source: { name: '北京' }, curve: [{x: -10, y: 10, z: 25}, {x: -10, y: -3, z: 40}], value: 150 },
-        { source: { name: '西安' }, curve: [{x: -3, y: -7, z: 10}, {x: -10, y: -3, z: 40}], value: 60 },
-        { source: { name: '上海' }, curve: [{x: 2, y: 16, z: 30}, {x: -10, y: -3, z: 40}], value: 70 },
-        { source: { name: '徐州' }, curve: [{x: 2, y: 5, z: 30}, {x: -10, y: -3, z: 40}], value: 70 },
-        { source: { name: '杭州' }, curve: [{x: 2, y: 10, z: 30}, {x: -10, y: -3, z: 40}], value: 70 },
-        { source: { name: '遵义' }, curve: [{x: 2, y: 1, z: 10}, {x: -10, y: -3, z: 40}], value: 70 },
-        { source: { name: '和田' }, curve: [{x: -25, y: -40, z: 10}, {x: -10, y: -3, z: 40}], value: 200}
+        { source: { name: '北京' }, curve: [{x: -10, y: 8, z: 15}, {x: -10, y: -5, z: 25}], value: 150 },
+        { source: { name: '西安' }, curve: [{x: -3, y: 0, z: 15}, {x: -10, y: -8, z: 25}], value: 60 },
+        { source: { name: '上海' }, curve: [{x: 2, y: 16, z: 25}, {x: -10, y: -3, z: 25}], value: 70 },
+        { source: { name: '徐州' }, curve: [{x: 2, y: 5, z: 22}, {x: -10, y: -6, z: 25}], value: 70 },
+        { source: { name: '杭州' }, curve: [{x: 2, y: 10, z: 25}, {x: -10, y: -4, z: 25}], value: 70 },
+        { source: { name: '遵义' }, curve: [{x: 2, y: 6, z: 18}, {x: -10, y: -7, z: 25}], value: 70 },
+        { source: { name: '和田' }, curve: [{x: -25, y: -40, z: 10}, {x: -10, y: -10, z: 25}], value: 200}
       ]
     }
   },
@@ -73,15 +101,17 @@ export default {
       // _this.initMap(jsonData)
       const map = new ThreeMapLightBar({ 
         mapData, 
+        flyDatas: _this.flyDatas,
+        isControl: false,
         labelDatas: _this.labelDatas,
         canvasId: "canvas_content",
-        scenePos:{ x: 0, y: 0, z: -32.5 },
+        scenePos:{ x: -26.37, y: 5.39, z: -32.37 },
         cameraConfig: {
           fov: 10,
           aspect: window.innerWidth / (window.innerHeight),
           near: 1,
           far: 100000,
-          pos: { x: 327, y: 42, z: 311 }
+          pos: { x: 396, y: 12, z: 167 }
         },
         helperConfig: { isShow: false, length: 30 },
         mirrorConfig: { isShow: false},
@@ -103,37 +133,42 @@ export default {
           }
         },
         flyLineConfig: {
-          colors: ["rgb(245,127,127)", "rgb(255,0,0)", "rgb(245,127,127)"],
+          colors: ["rgb(0,255,245)"],
+          // colors: ["rgb(245,127,127)", "rgb(255,0,0)", "rgb(245,127,127)"],
           pointLength: 90,
-          moveLength: 15,
-          width: 2,
-          opacity:1
+          moveLength: 9,
+          width: 1,
+          lightLineWidth: 3,
+          opacity: 0.3
         },
         animateConfig: {
-          time: 20
+          time: 30,
         }
       })
       
-      _this.endVal = 18181116
+      _this.endVal = 18181185
       map.on('mouseFn', (e, g, p) => {
         const type = e.type
         if (type == 'mousemove') {
-          map.setLabelPos(g, 'mousemove', p)
+          // map.setLabelPos(g, 'mousemove', p)
           _this.provinceName = map.provinceName
           // map.setAreaColor(g);
         } else if (type == 'mouseup') {
           // map.setAreaColor(g)
-          map.setLabelPos(g, 'mouseup', p)
+          // map.setLabelPos(g, 'mouseup', p)
         }
       })
-      // map.mapFixedLabel()
+      map.mapFixedLabel()
 
       // 绘制光柱
       // map.drawLightBar(_this.labelDatas)
 
       // 绘制线条
-      // map.drawFlyLine(_this.flyDatas)
+      map.drawFlyLine()
     })
+    setInterval(() => {
+      this.curIndex =  (this.curIndex + 1) % this.wheelData.length      
+    }, 2000);
   },
   created() {},
   methods: {}

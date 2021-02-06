@@ -29,8 +29,10 @@ export default class ThreeMapLightBar extends ThreeMap {
       pointLength: 90,
       moveLength: 30,
       width: 1,
+      lightLineWidth: 2,
       opacity: 1,
     };
+    this.flyDatas = set.flyDatas
     this.borderLineConfig = set.borderLineConfig || { isShow: false };
     this.dataKeys = {};
     this.setDataKeys();
@@ -71,24 +73,27 @@ export default class ThreeMapLightBar extends ThreeMap {
    */
   doAnimate = throttle(() => {
     const ratio = this.colorIndex / this.flyLineConfig.pointLength;
-    this.flyGroup &&
-      this.flyGroup.children.forEach((d) => {
-        let colorList = [];
+    this.flyGroup1 &&
+      this.flyGroup1.children.forEach((d) => {
+        let moveLength = this.flyLineConfig.moveLength;
+        let moveIndex = (this.colorIndex * 3) % d.userData.positions.length
+        d.geometry.setPositions(d.userData.positions.slice(moveIndex,moveIndex + moveLength));
+        // let colorList = [];
         // let value = d.userData.value
         // let max = d.userData.max
-        colorList = util.getRgb(
-          this.flyLineConfig.colors,
-          this.flyLineConfig.pointLength
-        );
-        const color = new THREE.Color("#fff");
-        let moveLength = this.flyLineConfig.moveLength;
-        let rgbArr = [];
-        for (let i = 0; i < Math.ceil(moveLength / 3); i++) {
-          rgbArr.push(color.r, color.g, color.b);
-        }
-        colorList.splice(this.colorIndex * 3, moveLength, ...rgbArr);
-        d.geometry.setColors(colorList);
-        d.geometry.colorsNeedUpdate = true;
+        // colorList = util.getRgb(
+        //   this.flyLineConfig.colors,
+        //   this.flyLineConfig.pointLength
+        // );
+        // const color = new THREE.Color("#fff");
+        // let moveLength = this.flyLineConfig.moveLength;
+        // let rgbArr = [];
+        // for (let i = 0; i < Math.ceil(moveLength / 3); i++) {
+        //   rgbArr.push(color.r, color.g, color.b);
+        // }
+        // colorList.splice(this.colorIndex * 3, moveLength, ...rgbArr);
+        // d.geometry.setColors(colorList);
+        // d.geometry.colorsNeedUpdate = true;
       });
 
     this.sixLineGroup &&
@@ -172,7 +177,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     group.name = "六边体";
     const sixLineGroup = new THREE.Group();
     sixLineGroup.name = "六边线";
-    data.forEach((d, i) => {
+    this.flyDatas.forEach((d, i) => {
       const lnglat = this.dataKeys[d.name];
       const [x, y, z] = this.lnglatToMector(lnglat);
 
@@ -239,11 +244,12 @@ export default class ThreeMapLightBar extends ThreeMap {
    *
    * }
    */
-  drawFlyLine(data) {
+  drawFlyLine() {
     const group = new THREE.Group();
+    const group1 = group.clone()
     group.name = "飞线";
-    const maxValue = Math.max(...data.map((item) => item.value));
-    data.forEach((d) => {
+    const maxValue = Math.max(...this.flyDatas.map((item) => item.value));
+    this.flyDatas.forEach((d) => {
       // 源和目标省份的经纬度
       const slnglat = this.dataKeys[d.source.name];
       const value = d.value;
@@ -288,8 +294,8 @@ export default class ThreeMapLightBar extends ThreeMap {
         vertexColors: true, // 是否使用顶点着色 THREE.NoColors THREE.VertexColors THREE.FaceColors
         transparent: true,
         linewidth: this.flyLineConfig.width,
-        linecap: "square", // 线两端的样式
-        linejoin: "round", // 线连接节点的样式
+        linecap: "butt", // 线两端的样式
+        // linejoin: "round", // 线连接节点的样式
         opacity: this.flyLineConfig.opacity,
         lights: false, // 材质是否受到光照的影响
         // clipShadows: true,
@@ -299,12 +305,27 @@ export default class ThreeMapLightBar extends ThreeMap {
       const mesh = new Line2(geometry, material);
       mesh.userData.value = value;
       mesh.userData.max = maxValue;
+      
+      const geometry1 = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
+      // geometry1.setPositions(positions.splice(0,30));
+      geometry1.setColors(
+        util.getRgb(['rgb(255, 255, 255)'], this.flyLineConfig.moveLength)
+      );
+      let material1 = material.clone()
+      material1.opacity = 1;
+      material1.linewidth = this.flyLineConfig.lightLineWidth
+      const mesh1 = new Line2(geometry1, material1);
+      mesh1.userData.positions = positions;
       group.add(mesh);
+      group1.add(mesh1);
     });
     this.flyGroup = group;
+    this.flyGroup1 = group1
     // this.flyGroup.position.z = this.modelConfig.height + 0.1;
     this.flyGroup.position.z = 0.1;
+    this.flyGroup1.position.z = 0.05;
     this.scene.add(this.flyGroup);
+    this.scene.add(this.flyGroup1);
   }
 
   drawBorderMesh(borderData) {
@@ -326,7 +347,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       });
     });
 
-    meshGroup.position.z = this.modelConfig.height + 0.1;
+    meshGroup.position.z = this.modelConfig.height;
     mirrorGroup.position.z = 0;
     mirrorGroup.position.x = 1;
     lineGroup.position.z = this.modelConfig.height + 0.2;

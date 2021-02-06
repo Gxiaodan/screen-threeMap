@@ -113,7 +113,7 @@ export default class ThreeMap {
       time: 30,
     };
     this.provinceName = "";
-    this.isControl = true;
+    this.isControl = set.isControl ? true : false;
     this.isFirst = true; // 控制label是否在有动画但地图不可动的情况下是否渲染，节省性能
     this.mapColors = ["#0684fd", "#006de0"];
     this.init();
@@ -128,6 +128,7 @@ export default class ThreeMap {
     // this.scene.background = new THREE.Color("#7d547c");
     // this.scene.fog = new THREE.Fog("#0f0", 480, 500);
     this.scene.position.set(this.scenePos.x, this.scenePos.y, this.scenePos.z);
+    this.scene.scale.set(1.19, 1.04, 1)
     this.camera = new THREE.PerspectiveCamera(
       this.cameraConfig.fov,
       this.cameraConfig.aspect,
@@ -403,7 +404,7 @@ export default class ThreeMap {
       this.lineConfig.color,
       this.lineConfig.width
     );
-    lineGroup.position.z = this.modelConfig.height + 0.15;
+    lineGroup.position.z = this.modelConfig.height+0.06;
     this.scene.add(lineGroup);
     // const lineGroupBottom = lineGroup.clone();
     // lineGroupBottom.position.z = -0.01;
@@ -534,6 +535,7 @@ export default class ThreeMap {
         bevelEnabled: false, // 对挤出的形状应用是否斜角
       });
       const groundMirror = new Reflector(geometry, {
+        // color: '#000',
         clipBias: 0.003,
       });
       return groundMirror;
@@ -648,7 +650,6 @@ export default class ThreeMap {
     requestAnimationFrame(this.animate.bind(this));
     // required if controls.enableDamping or controls.autoRotate are set to true
     this.controls.update();
-    // console.log(this.camera, "camera");
     this.renderer.render(this.scene, this.camera);
     if ((!this.isControl && this.isFirst) || this.isControl) {
       this.labelRenderer.render(this.scene, this.camera);
@@ -656,6 +657,8 @@ export default class ThreeMap {
     }
     // this.labelControls.update();
     this.doAnimate && this.doAnimate.bind(this)();
+    // console.log(this.camera, "camera");
+    // console.log(this.scene, 'this.scene')
   }
 
   /**
@@ -666,21 +669,22 @@ export default class ThreeMap {
       this.camera,
       this.labelRenderer.domElement
     );
-    this.controls.enablePan = true; // 邮件拖拽
-    this.controls.enableZoom = true; // 滚轮缩放
-    this.controls.enableRotate = true; // 左键旋转
-    this.controls.minZoom = 0.5; // 缩放范围
-    this.controls.maxZoom = 2.0;
-    // 上下旋转范围
-    // this.controls.minPolarAngle = Math.PI * (90 / 360);
-    // this.controls.maxPolarAngle = Math.PI * (1 - 230 / 360);
-    this.controls.minPolarAngle = 0;
-    this.controls.maxPolarAngle = Math.PI * (1 / 2);
-    // 左右旋转范围
-    this.controls.minAzimuthAngle = Math.PI * (70 / 180);
-    this.controls.maxAzimuthAngle = Math.PI * (120 / 180);
-
     this.controls.enabled = this.isControl;
+    if(this.isControl) {
+      this.controls.enablePan = true; // 邮件拖拽
+      this.controls.enableZoom = true; // 滚轮缩放
+      this.controls.enableRotate = true; // 左键旋转
+      this.controls.minZoom = 0.5; // 缩放范围
+      this.controls.maxZoom = 2.0;
+      // 上下旋转范围
+      this.controls.minPolarAngle = Math.PI * (90 / 360);
+      this.controls.maxPolarAngle = Math.PI * (1 - 230 / 360);
+      // this.controls.minPolarAngle = 0;
+      // this.controls.maxPolarAngle = Math.PI * (1 / 2);
+      // 左右旋转范围
+      this.controls.minAzimuthAngle = Math.PI * (70 / 180);
+      this.controls.maxAzimuthAngle = Math.PI * (120 / 180);
+    }
     this.controls.update();
   }
 

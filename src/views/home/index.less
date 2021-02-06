@@ -5,6 +5,63 @@ h1{
   font-family: CFChaoRan;
   src: url('~@/assets/font/CFChaoRan-Noncommercial.ttf');
 }
+@font-face {
+  font-family: ZhongHeiJianTi;
+  src: url('~@/assets/font/ShiShangZhongHeiJianTi.ttf');
+}
+
+// .fade-enter-active, .fade-leave-active {
+//   transition: all 1s ease-in-out;
+// }
+// .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+//   opacity: 0;
+//   top: -50px;
+// }
+.main-con{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  font-family: "ZhongHeiJianTi";
+  .wheel-con{
+    position: absolute;
+    width: 830px;
+    height: 50px;
+    left: 540px;
+    top: 120px; 
+    overflow: hidden;
+  }
+  .sub-tit{
+    position: absolute;
+    width: 830px;
+    height: 50px;
+    line-height: 50px;
+    margin-top: 2px;
+    padding-left: 128px;
+    transition: all 1s ease-in-out;
+    top: 50px;
+    &.active{
+      top: 0px;
+    }
+    &.lastActive{
+      top: -50px;
+    }
+    span{
+      display: inline-block;
+      font-size: 16px;
+    }
+    .place{
+      width: 220px;
+      font-size: 24px;
+    }
+    .name{
+      width: 360px;
+      margin-left: 20px;
+    }
+  }
+}
 body{
   background: #000;
 }
@@ -20,13 +77,35 @@ body{
   color: #fff;
 }
 .fixed-label{
-  width: 80px;
-  height: 30px;
-  margin-top: -15px;
+  // width: 80px;
+  // height: 30px;
+  padding: 2px 10px;
+  margin-top: -36px;
+  margin-left: 35px;
   background: rgba(0, 0, 0, 0.5);
   color: #fff;
-  background: url('~@/assets/img/zdcs_icon.png');
-  background-size: contain;
+  font-size:14px;
+  background:  url('~@/assets/img/label.png');
+  background-size: cover;
+  img{
+    width: 80px;
+    height: 40px;
+    margin: 0 0 0 -60px;
+    // background: #fff;
+    position: absolute;
+    &.top_img{
+      margin-top: -10px;
+    }
+  }
+}
+
+#label-005{
+  margin-left: -10px;
+  margin-top: -56px;
+  img{
+    margin-left: -20px;
+    margin-top: 20px;
+  }
 }
 
 
@@ -51,19 +130,34 @@ body{
     // left: 0px;
     // top: -400px;
     .num-con{
-      font-size: 80px;
+      font-size: 95px;
       font-weight: bold;
       text-align: center;
-      margin-top: 30px;
+      // margin-top: 30px;
       font-family: 'CFChaoRan';
       &>span{
         display: block;
-        background-image: -webkit-linear-gradient(bottom, red, #fd8403, yellow);
+        background-image: -webkit-linear-gradient(bottom, #ffaf00, #fff76e);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        -webkit-box-reflect: below -40px -webkit-linear-gradient(top,transparent 40%,rgba(0,0,0, 0.7));
+        -webkit-box-reflect: below -40px -webkit-linear-gradient(top,transparent 55%,rgba(0,0,0, 1));
 
+      }
+      .unit{
+        font-size: 30px;
+        color: #fff;
+        float: right;
+        margin-top: -70px;
+        margin-left: -76px;
       }
     }
   }
+}
+.line-bg{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url('~@/assets/img/flyLine.png');
+  left: 0;
+  top: 0;
 }
