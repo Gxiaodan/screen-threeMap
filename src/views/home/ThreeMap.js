@@ -128,7 +128,7 @@ export default class ThreeMap {
     // this.scene.background = new THREE.Color("#7d547c");
     // this.scene.fog = new THREE.Fog("#0f0", 480, 500);
     this.scene.position.set(this.scenePos.x, this.scenePos.y, this.scenePos.z);
-    this.scene.scale.set(1.19, 1.04, 1)
+    this.scene.scale.set(1.19, 1.04, 1);
     this.camera = new THREE.PerspectiveCamera(
       this.cameraConfig.fov,
       this.cameraConfig.aspect,
@@ -404,7 +404,7 @@ export default class ThreeMap {
       this.lineConfig.color,
       this.lineConfig.width
     );
-    lineGroup.position.z = this.modelConfig.height+0.06;
+    lineGroup.position.z = this.modelConfig.height + 0.06;
     this.scene.add(lineGroup);
     // const lineGroupBottom = lineGroup.clone();
     // lineGroupBottom.position.z = -0.01;
@@ -549,6 +549,7 @@ export default class ThreeMap {
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
       texture.repeat.set(0.011, 0.01);
       texture.offset.set(0.56, 0.62);
+      // texture.anisotropy = 16;
       texture.rotation = -80;
       const material = new THREE.MeshBasicMaterial({
         map: texture,
@@ -604,7 +605,7 @@ export default class ThreeMap {
     sideTexture.repeat.set(1, 1 / this.modelConfig.height);
     const material1 = new THREE.MeshBasicMaterial({
       map: sideTexture,
-      depthTest: false,
+      // depthTest: false,
       transparent: true,
       side: THREE.DoubleSide,
       opacity: this.modelConfig.sideModel.opacity,
@@ -670,20 +671,21 @@ export default class ThreeMap {
       this.labelRenderer.domElement
     );
     this.controls.enabled = this.isControl;
-    if(this.isControl) {
+    if (this.isControl) {
       this.controls.enablePan = true; // 邮件拖拽
       this.controls.enableZoom = true; // 滚轮缩放
       this.controls.enableRotate = true; // 左键旋转
       this.controls.minZoom = 0.5; // 缩放范围
       this.controls.maxZoom = 2.0;
       // 上下旋转范围
-      this.controls.minPolarAngle = Math.PI * (90 / 360);
-      this.controls.maxPolarAngle = Math.PI * (1 - 230 / 360);
+      // this.controls.minPolarAngle = Math.PI * (90 / 360);
+      // this.controls.maxPolarAngle = Math.PI * (1 - 230 / 360);
+      // ============================
       // this.controls.minPolarAngle = 0;
       // this.controls.maxPolarAngle = Math.PI * (1 / 2);
       // 左右旋转范围
-      this.controls.minAzimuthAngle = Math.PI * (70 / 180);
-      this.controls.maxAzimuthAngle = Math.PI * (120 / 180);
+      // this.controls.minAzimuthAngle = Math.PI * (70 / 180);
+      // this.controls.maxAzimuthAngle = Math.PI * (120 / 180);
     }
     this.controls.update();
   }
@@ -755,7 +757,7 @@ export default class ThreeMap {
   setHelper() {
     if (this.helperConfig.isShow) {
       const axesHelper = new THREE.AxisHelper(this.helperConfig.length);
-      axesHelper.position.z = 1;
+      // axesHelper.position.z = 1;
       this.scene.add(axesHelper);
     }
   }

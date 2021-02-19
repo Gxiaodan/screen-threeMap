@@ -28,7 +28,7 @@
       </div>
     </div>
     <div v-for="(label, index) in labelDatas" :key="index" :id="label.id" class="fixed-label">
-      <img src="@/assets/img/spanBg.png">
+      <!-- <img src="@/assets/img/spanBg.png"> -->
       <!-- <img class="top_img" src="@/assets/img/spanBg.png"> -->
       {{label.name}}
     </div>
@@ -39,7 +39,7 @@
 <script>
 import * as THREE from 'three'
 import './index.less'
-import topImg from '@/assets/img/top.png'
+import topImg from '@/assets/img/top0.jpg'
 import sideImg from '@/assets/img/side.png'
 import ThreeMapLightBar from './ThreeMapLightBar.js'
 import ThreeMap from './ThreeMap.js'
@@ -102,7 +102,7 @@ export default {
       const map = new ThreeMapLightBar({ 
         mapData, 
         flyDatas: _this.flyDatas,
-        isControl: false,
+        isControl: true,
         labelDatas: _this.labelDatas,
         canvasId: "canvas_content",
         scenePos:{ x: -26.37, y: 5.39, z: -32.37 },
@@ -161,7 +161,7 @@ export default {
       map.mapFixedLabel()
 
       // 绘制光柱
-      // map.drawLightBar(_this.labelDatas)
+      map.drawLightBar()
 
       // 绘制线条
       map.drawFlyLine()

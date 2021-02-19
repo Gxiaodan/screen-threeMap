@@ -1,5 +1,5 @@
 import ThreeMap from "./ThreeMap";
-import img1 from "../../../public/assets/images/tra_icon.png";
+import img1 from "../../../public/assets/images/lightray.jpg";
 import img2 from "../../../public/assets/images/lightray_yellow.jpg";
 import throttle from "lodash.throttle";
 
@@ -32,7 +32,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       lightLineWidth: 2,
       opacity: 1,
     };
-    this.flyDatas = set.flyDatas
+    this.flyDatas = set.flyDatas;
     this.borderLineConfig = set.borderLineConfig || { isShow: false };
     this.dataKeys = {};
     this.setDataKeys();
@@ -76,8 +76,10 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.flyGroup1 &&
       this.flyGroup1.children.forEach((d) => {
         let moveLength = this.flyLineConfig.moveLength;
-        let moveIndex = (this.colorIndex * 3) % d.userData.positions.length
-        d.geometry.setPositions(d.userData.positions.slice(moveIndex,moveIndex + moveLength));
+        let moveIndex = (this.colorIndex * 3) % d.userData.positions.length;
+        d.geometry.setPositions(
+          d.userData.positions.slice(moveIndex, moveIndex + moveLength)
+        );
         // let colorList = [];
         // let value = d.userData.value
         // let max = d.userData.max
@@ -115,10 +117,20 @@ export default class ThreeMapLightBar extends ThreeMap {
    * @desc 绘制6边形
    */
   drawSixMesh(x, y, z, i, size = 5) {
-    const geometry = new THREE.CircleGeometry(0.5, size);
-    const material = new THREE.MeshBasicMaterial({ color: this.colors[i % 2] });
+    // const geometry = new THREE.CircleGeometry(0.5, size);
+    const geometry = new THREE.BoxGeometry(1, 1, 4, 4, 4, 4);
+    let map = new THREE.TextureLoader().load(this.modelConfig.topModel.map);
+    map.wrapS = map.wrapT = THREE.RepeatWrapping;
+    const material = new THREE.MeshBasicMaterial({
+      color: this.colors[0],
+      map: map,
+    });
+    const material1 = new THREE.MeshBasicMaterial({
+      color: this.colors[1],
+      map: map,
+    });
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(x, y, z + 1.1);
+    mesh.position.set(x, y, z + this.modelConfig.height + 3.3);
     return mesh;
   }
 
@@ -130,11 +142,11 @@ export default class ThreeMapLightBar extends ThreeMap {
     const geometry = new THREE.CircleGeometry(0.7, 6);
     const material = new THREE.MeshBasicMaterial({
       color: this.colors[i % 2],
-      transparent: true,
+      // transparent: false,
     });
     geometry.vertices.shift();
     const line = new THREE.LineLoop(geometry, material);
-    line.position.set(x, y, z + 1.1);
+    line.position.set(x, y, z + this.modelConfig.height + 0.3);
     return line;
   }
 
@@ -151,16 +163,16 @@ export default class ThreeMapLightBar extends ThreeMap {
     //   depth: 1
     // });
     const material = new THREE.MeshBasicMaterial({
-      map: this.textures[i % 2], // 颜色贴图
-      depthTest: false, // 是否在渲染此材质时启用深度测试
-      transparent: true,
+      // map: this.textures[i % 2], // 颜色贴图
+      // depthTest: false, // 是否在渲染此材质时启用深度测试
+      // transparent: true,
       color: this.colors[i % 2],
       side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending, // 在使用此材质显示对象时要使用何种混合
+      // blending: THREE.AdditiveBlending, // 在使用此材质显示对象时要使用何种混合
     });
     const plane = new THREE.Mesh(geometry, material);
-    plane.position.set(x, y, z + 1.1);
-    plane.position.set(x, y, z + 1.1 + hei / 2);
+    // plane.position.set(x, y, z + 1.1);
+    plane.position.set(x, y, z + this.modelConfig.height + hei / 2);
     plane.rotation.x = Math.PI / 2;
     plane.rotation.z = Math.PI;
     const plane2 = plane.clone();
@@ -172,13 +184,14 @@ export default class ThreeMapLightBar extends ThreeMap {
   /**
    * @desc 绘制光柱
    */
-  drawLightBar(data, type) {
+  drawLightBar(type) {
     const group = new THREE.Group();
     group.name = "六边体";
     const sixLineGroup = new THREE.Group();
     sixLineGroup.name = "六边线";
-    this.flyDatas.forEach((d, i) => {
+    this.labelDatas.forEach((d, i) => {
       const lnglat = this.dataKeys[d.name];
+      // const lnglat = d.coordinates;
       const [x, y, z] = this.lnglatToMector(lnglat);
 
       // 绘制六边体
@@ -221,8 +234,8 @@ export default class ThreeMapLightBar extends ThreeMap {
 
       // 绘制柱子
       const [plane1, plane2] = this.drawPlane(x, y, z, d.value, i);
-      group.add(plane2);
-      group.add(plane1);
+      // group.add(plane2);
+      // group.add(plane1);
     });
 
     this.sixLineGroup = sixLineGroup;
@@ -246,7 +259,7 @@ export default class ThreeMapLightBar extends ThreeMap {
    */
   drawFlyLine() {
     const group = new THREE.Group();
-    const group1 = group.clone()
+    const group1 = group.clone();
     group.name = "飞线";
     const maxValue = Math.max(...this.flyDatas.map((item) => item.value));
     this.flyDatas.forEach((d) => {
@@ -305,22 +318,22 @@ export default class ThreeMapLightBar extends ThreeMap {
       const mesh = new Line2(geometry, material);
       mesh.userData.value = value;
       mesh.userData.max = maxValue;
-      
+
       const geometry1 = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
       // geometry1.setPositions(positions.splice(0,30));
       geometry1.setColors(
-        util.getRgb(['rgb(255, 255, 255)'], this.flyLineConfig.moveLength)
+        util.getRgb(["rgb(255, 255, 255)"], this.flyLineConfig.moveLength)
       );
-      let material1 = material.clone()
+      let material1 = material.clone();
       material1.opacity = 1;
-      material1.linewidth = this.flyLineConfig.lightLineWidth
+      material1.linewidth = this.flyLineConfig.lightLineWidth;
       const mesh1 = new Line2(geometry1, material1);
       mesh1.userData.positions = positions;
       group.add(mesh);
       group1.add(mesh1);
     });
     this.flyGroup = group;
-    this.flyGroup1 = group1
+    this.flyGroup1 = group1;
     // this.flyGroup.position.z = this.modelConfig.height + 0.1;
     this.flyGroup.position.z = 0.1;
     this.flyGroup1.position.z = 0.05;
@@ -347,7 +360,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       });
     });
 
-    meshGroup.position.z = this.modelConfig.height;
+    meshGroup.position.z = this.modelConfig.height + 0.02;
     mirrorGroup.position.z = 0;
     mirrorGroup.position.x = 1;
     lineGroup.position.z = this.modelConfig.height + 0.2;
