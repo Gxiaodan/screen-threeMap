@@ -15,23 +15,23 @@
       </div>
     </div>
     <div id="canvas_content" >
-    <div id="dialogDiv">
-      <div>省份&nbsp;:&nbsp;&nbsp;&nbsp;{{ provinceName }}</div>
-    </div>
-    <div id="hoverDiv">
-      <div>省份&nbsp;:&nbsp;&nbsp;&nbsp;{{ provinceName }}</div>
-    </div>
-    <div id="totalDiv">
-      <div class="num-con">
-        <countTo :startVal='startVal' :endVal='endVal'></countTo>
-        <div class="unit">元</div>
+      <div id="dialogDiv">
+        <div>省份&nbsp;:&nbsp;&nbsp;&nbsp;{{ provinceName }}</div>
       </div>
-    </div>
-    <div v-for="(label, index) in labelDatas" :key="index" :id="label.id" class="fixed-label">
-      <!-- <img src="@/assets/img/spanBg.png"> -->
-      <!-- <img class="top_img" src="@/assets/img/spanBg.png"> -->
-      {{label.name}}
-    </div>
+      <div id="hoverDiv">
+        <div>省份&nbsp;:&nbsp;&nbsp;&nbsp;{{ provinceName }}</div>
+      </div>
+      <div id="totalDiv">
+        <div class="num-con">
+          <countTo :startVal='startVal' :endVal='endVal'></countTo>
+          <div class="unit">元</div>
+        </div>
+      </div>
+      <div v-for="(label, index) in labelDatas" :key="index" :id="label.id" class="fixed-label">
+        <!-- <img src="@/assets/img/spanBg.png"> -->
+        <!-- <img class="top_img" src="@/assets/img/spanBg.png"> -->
+        {{label.name}}
+      </div>
     </div>
     <!-- <div class="line-bg"></div> -->
   </div>
