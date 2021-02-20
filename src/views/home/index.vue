@@ -68,10 +68,10 @@ export default {
       labelDatas: [
         { name: '北京', value: 100, coordinates:[116.405285, 39.904989], id: "label-001"},
         { name: '徐州', value: 100, coordinates:[117.2, 34.26], id: "label-002"},
-        { name: '遵义', value: 100, coordinates:[116.9, 27.7], id: "label-003"},
-        { name: '和田', value: 100, coordinates:[79.94, 37.12], id: "label-004"},
-        { name: '杭州', value: 100, coordinates:[120.19, 30.26], id: "label-005"},
-        { name: '西安', value: 83, coordinates:[108.948024, 34.263161], id: "label-006"},
+        { name: '遵义', value: 200, coordinates:[116.9, 27.7], id: "label-003"},
+        { name: '和田', value: 250, coordinates:[79.94, 37.12], id: "label-004"},
+        { name: '杭州', value: 150, coordinates:[120.19, 30.26], id: "label-005"},
+        { name: '西安', value: 50, coordinates:[108.948024, 34.263161], id: "label-006"},
         { name: '上海', value: 73, coordinates:[121.472644, 31.231706], id: "label-007"}
       ],
        datas: [
@@ -80,14 +80,22 @@ export default {
         { name: '陕西省', value: 83 },
         { name: '上海市', value: 73 }
       ],
+      // flyDatas: [
+      //   { source: { name: '北京' }, curve: [{x: -10, y: 8, z: 15}, {x: -10, y: -5, z: 25}], value: 150 },
+      //   { source: { name: '西安' }, curve: [{x: -3, y: 0, z: 15}, {x: -10, y: -8, z: 25}], value: 60 },
+      //   { source: { name: '上海' }, curve: [{x: 2, y: 16, z: 25}, {x: -10, y: -3, z: 25}], value: 70 },
+      //   { source: { name: '徐州' }, curve: [{x: 2, y: 5, z: 22}, {x: -10, y: -6, z: 25}], value: 70 },
+      //   { source: { name: '杭州' }, curve: [{x: 2, y: 10, z: 25}, {x: -10, y: -4, z: 25}], value: 70 },
+      //   { source: { name: '遵义' }, curve: [{x: 2, y: 6, z: 18}, {x: -10, y: -7, z: 25}], value: 70 },
+      //   { source: { name: '和田' }, curve: [{x: -25, y: -40, z: 10}, {x: -10, y: -10, z: 25}], value: 200}
+      // ],
       flyDatas: [
-        { source: { name: '北京' }, curve: [{x: -10, y: 8, z: 15}, {x: -10, y: -5, z: 25}], value: 150 },
-        { source: { name: '西安' }, curve: [{x: -3, y: 0, z: 15}, {x: -10, y: -8, z: 25}], value: 60 },
-        { source: { name: '上海' }, curve: [{x: 2, y: 16, z: 25}, {x: -10, y: -3, z: 25}], value: 70 },
-        { source: { name: '徐州' }, curve: [{x: 2, y: 5, z: 22}, {x: -10, y: -6, z: 25}], value: 70 },
-        { source: { name: '杭州' }, curve: [{x: 2, y: 10, z: 25}, {x: -10, y: -4, z: 25}], value: 70 },
-        { source: { name: '遵义' }, curve: [{x: 2, y: 6, z: 18}, {x: -10, y: -7, z: 25}], value: 70 },
-        { source: { name: '和田' }, curve: [{x: -25, y: -40, z: 10}, {x: -10, y: -10, z: 25}], value: 200}
+        { source: { name: '北京' }, target: { name: '西安' }, value: 150 },
+        { source: { name: '上海' }, target: { name: '西安' },value: 70 },
+        { source: { name: '徐州' }, target: { name: '西安' },value: 70 },
+        { source: { name: '杭州' }, target: { name: '西安' }, value: 70 },
+        { source: { name: '遵义' }, target: { name: '西安' }, value: 70 },
+        { source: { name: '和田' }, target: { name: '西安' }, value: 200}
       ]
     }
   },
@@ -135,13 +143,13 @@ export default {
           }
         },
         flyLineConfig: {
-          colors: ["rgb(0,255,245)"],
+          colors: ["rgb(255,255,0)"],
           // colors: ["rgb(245,127,127)", "rgb(255,0,0)", "rgb(245,127,127)"],
           pointLength: 90,
-          moveLength: 9,
+          moveLength: 6,
           width: 1,
-          lightLineWidth: 3,
-          opacity: 0.3
+          lightLineWidth: 4,
+          opacity: 1
         },
         animateConfig: {
           time: 30,

@@ -125,6 +125,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.rotation.x = 1.6;
+    mesh.rotation.y = 0.5;
     mesh.position.set(x, y, z + this.modelConfig.height + 2.3);
     return mesh;
   }
@@ -149,31 +150,17 @@ export default class ThreeMapLightBar extends ThreeMap {
    * @desc 柱子
    */
   drawPlane(x, y, z, value, i) {
-    const hei = value / 20;
-    const geometry = new THREE.PlaneGeometry(1, hei);
-    // var shape = new THREE.CircleGeometry(1, 1);
-    // const geometry = new THREE.ExtrudeGeometry(shape, {
-    //   amount: 1, // 拉伸长度，默认100
-    //   bevelEnabled: false, // 对挤出的形状应用是否斜角
-    //   depth: 1
-    // });
+    const hei = value / 50;
+    const geometry = new THREE.BoxGeometry(1, hei, 1, 4, 4, 4);
+    let map = new THREE.TextureLoader().load(this.modelConfig.barModel.map);
     const material = new THREE.MeshBasicMaterial({
-      // map: this.textures[i % 2], // 颜色贴图
-      // depthTest: false, // 是否在渲染此材质时启用深度测试
-      // transparent: true,
-      color: this.colors[i % 2],
-      side: THREE.DoubleSide,
-      // blending: THREE.AdditiveBlending, // 在使用此材质显示对象时要使用何种混合
+      map: map,
     });
-    const plane = new THREE.Mesh(geometry, material);
-    // plane.position.set(x, y, z + 1.1);
-    plane.position.set(x, y, z + this.modelConfig.height + hei / 2);
-    plane.rotation.x = Math.PI / 2;
-    plane.rotation.z = Math.PI;
-    const plane2 = plane.clone();
-    plane2.rotation.y = Math.PI / 2;
-    return [plane, plane2];
-    // return [plane];
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.rotation.x = 1.6;
+    mesh.rotation.y = 0.5;
+    mesh.position.set(x, y, z + this.modelConfig.height + 2.3);
+    return mesh;
   }
 
   /**
@@ -190,7 +177,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       const [x, y, z] = this.lnglatToMector(lnglat);
 
       // 绘制六边体
-      group.add(this.drawSixMesh(x, y, z, i));
+      // group.add(this.drawSixMesh(x, y, z, i));
       // 绘制6边线
       sixLineGroup.add(this.drawSixLineLoop(x, y, z, i));
 
@@ -228,8 +215,8 @@ export default class ThreeMapLightBar extends ThreeMap {
       // this.scene.add(mesh);
 
       // 绘制柱子
-      const [plane1, plane2] = this.drawPlane(x, y, z, d.value, i);
-      // group.add(plane2);
+      const barMesh = this.drawPlane(x, y, z, d.value, i);
+      group.add(barMesh);
       // group.add(plane1);
     });
 
@@ -261,7 +248,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       // 源和目标省份的经纬度
       const slnglat = this.dataKeys[d.source.name];
       const value = d.value;
-      const z = 10;
+      const z = 20;
       const [x1, y1, z1] = this.lnglatToMector(slnglat);
       let x2, y2, z2;
       let curve;
@@ -269,13 +256,13 @@ export default class ThreeMapLightBar extends ThreeMap {
         const tlnglat = this.dataKeys[d.target.name];
         [x2, y2, z2] = this.lnglatToMector(tlnglat);
         curve = new THREE.QuadraticBezierCurve3(
-          new THREE.Vector3(x1, y1, z1 + 1.1),
+          new THREE.Vector3(x1, y1, z1 + this.modelConfig.height + 0.1),
           new THREE.Vector3((x1 + x2) / 2, (y1 + y2) / 2, z),
-          new THREE.Vector3(x2, y2, z2 + 1.1)
+          new THREE.Vector3(x2, y2, z2 + this.modelConfig.height + 0.1)
         );
       } else
         curve = new THREE.QuadraticBezierCurve3(
-          new THREE.Vector3(x1, y1, z1 + 1.1),
+          new THREE.Vector3(x1, y1, z1 + this.modelConfig.height + 0.1),
           new THREE.Vector3(d.curve[0].x, d.curve[0].y, d.curve[0].z),
           new THREE.Vector3(d.curve[1].x, d.curve[1].y, d.curve[1].z)
         );
