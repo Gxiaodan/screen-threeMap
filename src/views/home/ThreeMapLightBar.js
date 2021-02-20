@@ -118,19 +118,14 @@ export default class ThreeMapLightBar extends ThreeMap {
    */
   drawSixMesh(x, y, z, i, size = 5) {
     // const geometry = new THREE.CircleGeometry(0.5, size);
-    const geometry = new THREE.BoxGeometry(1, 1, 4, 4, 4, 4);
-    let map = new THREE.TextureLoader().load(this.modelConfig.topModel.map);
-    map.wrapS = map.wrapT = THREE.RepeatWrapping;
+    const geometry = new THREE.BoxGeometry(1, 4, 1, 4, 4, 4);
+    let map = new THREE.TextureLoader().load(this.modelConfig.barModel.map);
     const material = new THREE.MeshBasicMaterial({
-      color: this.colors[0],
-      map: map,
-    });
-    const material1 = new THREE.MeshBasicMaterial({
-      color: this.colors[1],
       map: map,
     });
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(x, y, z + this.modelConfig.height + 3.3);
+    mesh.rotation.x = 1.6;
+    mesh.position.set(x, y, z + this.modelConfig.height + 2.3);
     return mesh;
   }
 
@@ -142,7 +137,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     const geometry = new THREE.CircleGeometry(0.7, 6);
     const material = new THREE.MeshBasicMaterial({
       color: this.colors[i % 2],
-      // transparent: false,
+      transparent: false,
     });
     geometry.vertices.shift();
     const line = new THREE.LineLoop(geometry, material);

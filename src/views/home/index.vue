@@ -39,7 +39,8 @@
 <script>
 import * as THREE from 'three'
 import './index.less'
-import topImg from '@/assets/img/top0.jpg'
+import topImg from '@/assets/img/top.png'
+import barImg from '@/assets/img/barImg.png'
 import sideImg from '@/assets/img/side.png'
 import ThreeMapLightBar from './ThreeMapLightBar.js'
 import ThreeMap from './ThreeMap.js'
@@ -119,7 +120,8 @@ export default {
         modelConfig: {
           topModel:{opacity: 0.5,map: topImg},
           sideModel:{opacity: 1,map: sideImg},
-          height: 3
+          height: 3,
+          barModel: {map:barImg}
         },
         lineConfig: {
           color: '#00fff5',

@@ -606,7 +606,7 @@ export default class ThreeMap {
     const material1 = new THREE.MeshBasicMaterial({
       map: sideTexture,
       // depthTest: false,
-      transparent: true,
+      // transparent: true,
       side: THREE.DoubleSide,
       opacity: this.modelConfig.sideModel.opacity,
     });
