@@ -116,7 +116,7 @@ export default class ThreeMapLightBar extends ThreeMap {
   /**
    * @desc 绘制6边形
    */
-  drawSixMesh(x, y, z, i, size = 5) {
+  drawSixMesh(x, y, z, i, size = 20) {
     const geometry = new THREE.CircleGeometry(0.5, size);
     const material = new THREE.MeshBasicMaterial({ color: this.colors[i % 2] });
     const mesh = new THREE.Mesh(geometry, material);
@@ -127,9 +127,9 @@ export default class ThreeMapLightBar extends ThreeMap {
   /**
    * @desc 绘制6边线
    */
-  drawSixLineLoop(x, y, z, i) {
+  drawSixLineLoop(x, y, z, i, r) {
     // 绘制六边型
-    const geometry = new THREE.CircleGeometry(0.7, 6);
+    const geometry = new THREE.CircleGeometry(r, 20);
     const material = new THREE.MeshBasicMaterial({
       color: this.colors[i % 2],
       transparent: false,
@@ -171,9 +171,11 @@ export default class ThreeMapLightBar extends ThreeMap {
       const [x, y, z] = this.lnglatToMector(lnglat);
 
       // 绘制六边体
-      // group.add(this.drawSixMesh(x, y, z, i));
+      group.add(this.drawSixMesh(x, y, z, i));
+
       // 绘制6边线
-      sixLineGroup.add(this.drawSixLineLoop(x, y, z, i));
+      sixLineGroup.add(this.drawSixLineLoop(x, y, z, i, 1));
+      sixLineGroup.add(this.drawSixLineLoop(x, y, z, i, 0.7));
 
       // const shape = new THREE.Shape();
       // shape.moveTo(0, 0);
@@ -294,6 +296,26 @@ export default class ThreeMapLightBar extends ThreeMap {
       mesh.userData.value = value;
       mesh.userData.max = maxValue;
 
+      // 管道实现外边缘效果
+      // const tubeCurve = new THREE.CatmullRomCurve3(points); // 曲线路径
+      // const tubeMaterial = new THREE.MeshBasicMaterial({
+      //   color: "#ff0",
+      //   transparent: true,
+      //   polygonOffset: true,
+      // });
+
+      // // 创建管道
+      // const tubeGeometry = new THREE.TubeGeometry(
+      //   tubeCurve,
+      //   80,
+      //   0.1,
+      //   50,
+      //   false
+      // ); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
+
+      // const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
+      // group.add(tubeMesh);
+
       const geometry1 = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
       // geometry1.setPositions(positions.splice(0,30));
       geometry1.setColors(
@@ -314,6 +336,9 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.flyGroup1.position.z = 0.05;
     this.scene.add(this.flyGroup);
     this.scene.add(this.flyGroup1);
+    this.selectedObjects.push(this.flyGroup);
+    this.outlinePass.selectedObjects = this.selectedObjects;
+    this.composer.render();
   }
 
   drawBorderMesh(borderData) {
@@ -328,8 +353,29 @@ export default class ThreeMapLightBar extends ThreeMap {
       points.forEach((point) => {
         const mesh = this.drawBorderModel(point);
         const mirrorMesh = this.drawBorderModel(point, "mirror");
-        const lineMesh = this.drawLine(point, "#f00", 2);
-        lineGroup.add(lineMesh);
+
+        let tubeP = [];
+        point.forEach((item) => {
+          tubeP.push(new THREE.Vector3(item[0], item[1], item[2]));
+        });
+        // CatmullRomCurve3创建一条平滑的三维样条曲线
+        const curve = new THREE.CatmullRomCurve3(tubeP); // 曲线路径
+        const tubeMaterial = new THREE.MeshBasicMaterial({
+          // map: this.texture,
+          color: "#00fff5",
+          shadowSide: THREE.BackSide,
+          transparent: true,
+          polygonOffset: true,
+        });
+
+        // 创建管道
+        const tubeGeometry = new THREE.TubeGeometry(curve, 80, 0.08, 50, false); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
+
+        const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
+
+        lineGroup.add(tubeMesh);
+        // const lineMesh = this.drawLine(point, "#f00", 2);
+        // lineGroup.add(lineMesh);
         meshGroup.add(mesh);
         mirrorGroup.add(mirrorMesh);
       });
@@ -338,9 +384,12 @@ export default class ThreeMapLightBar extends ThreeMap {
     meshGroup.position.z = this.modelConfig.height + 0.02;
     mirrorGroup.position.z = 0;
     mirrorGroup.position.x = 1;
-    lineGroup.position.z = this.modelConfig.height + 0.2;
+    lineGroup.position.z = this.modelConfig.height;
+    this.selectedObjects.push(lineGroup);
+    this.outlinePass.selectedObjects = this.selectedObjects;
+    this.composer.render();
 
-    this.scene.add(meshGroup);
+    // this.scene.add(meshGroup);
     if (this.mirrorConfig.isShow) this.scene.add(mirrorGroup);
     if (this.borderLineConfig.isShow) this.scene.add(lineGroup);
   }

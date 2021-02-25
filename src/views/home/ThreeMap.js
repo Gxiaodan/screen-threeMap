@@ -10,7 +10,9 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { AfterimagePass } from "three/examples/jsm/postprocessing/AfterimagePass.js";
+
 import {
   CSS2DRenderer,
   CSS2DObject,
@@ -108,7 +110,7 @@ export default class ThreeMap {
     this.lightConfig = set.lightConfig || {
       point: {
         pos: [100, 50, 100],
-        color: "#fff",
+        color: "#ff0",
       },
     };
     this.animateConfig = set.animateConfig || {
@@ -387,6 +389,7 @@ export default class ThreeMap {
     this.coordinatesTrans(this.mapData);
     // 绘制地图模型
     const group = new THREE.Group();
+    this.selectedObjects = [];
     group.name = "mapGroup";
     this.mapData.features.forEach((d, index) => {
       if (d.properties.name == "") return;
@@ -404,7 +407,6 @@ export default class ThreeMap {
           const mesh = this.drawModel(points);
           g.add(mesh);
         }
-        // this.selectedObjects.push(mesh[ 0 ].object)
       });
       group.add(g);
     });
@@ -416,39 +418,38 @@ export default class ThreeMap {
       this.lineConfig.width
     );
     lineGroup.position.z = this.modelConfig.height + 0.06;
-    this.scene.add(lineGroup);
+    // this.scene.add(lineGroup);
     // const lineGroupBottom = lineGroup.clone();
     // lineGroupBottom.position.z = -0.01;
     // this.scene.add(lineGroupBottom);
     // this.group.position.z = 2;
-    this.scene.add(this.group);
+    // this.scene.add(this.group);
     // var group1 = this.group.clone(); //克隆网格模型
     // group1.position.z = 0;
     // this.scene.add(group1);
 
-    const tubePoints = [
-      new THREE.Vector3(0, 0, 0),
-      new THREE.Vector3(0, 20, 0),
-      new THREE.Vector3(20, 0, 20),
-      new THREE.Vector3(0, 0, 20),
-    ];
+    //===============创建管道练习
+    // const tubePoints = [
+    //   new THREE.Vector3(-12.55, 10.47, 3.1),
+    //   new THREE.Vector3(-7.61, 5.267, 10),
+    //   new THREE.Vector3(-2.669, 0.061, 3.1),
+    // ];
 
-    // CatmullRomCurve3创建一条平滑的三维样条曲线
-    const curve = new THREE.CatmullRomCurve3(tubePoints); // 曲线路径
-    const tubeMaterial = new THREE.MeshBasicMaterial({
-      // map: this.texture,
-      color: "#ea6262",
-      shadowSide: THREE.BackSide,
-      transparent: true,
-      polygonOffset: true,
-    });
-    // 创建管道
-    const tubeGeometry = new THREE.TubeGeometry(curve, 80, 0.05, 50, false); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
+    // // CatmullRomCurve3创建一条平滑的三维样条曲线
+    // const curve = new THREE.CatmullRomCurve3(tubePoints); // 曲线路径
+    // const tubeMaterial = new THREE.MeshBasicMaterial({
+    //   // map: this.texture,
+    //   color: "#ff0",
+    //   shadowSide: THREE.BackSide,
+    //   transparent: true,
+    //   polygonOffset: true,
+    // });
+    // // 创建管道
+    // const tubeGeometry = new THREE.TubeGeometry(curve, 80, 0.08, 50, false); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
 
-    const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
-    this.scene.add(tubeMesh);
-    this.selectedObjects = [];
-    this.selectedObjects.push(tubeMesh);
+    // const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
+    // this.scene.add(tubeMesh);
+    // this.selectedObjects.push(tubeMesh);
   }
 
   /*
@@ -794,10 +795,10 @@ export default class ThreeMap {
       this.scene,
       this.camera
     );
-    this.composer.addPass(this.outlinePass);
+    // this.composer.addPass(this.outlinePass);
 
     const params = {
-      edgeStrength: 4.0,
+      edgeStrength: 1.8,
       edgeGlow: 0.0,
       edgeThickness: 2.5,
       pulsePeriod: 0,
@@ -808,13 +809,29 @@ export default class ThreeMap {
     this.outlinePass.edgeGlow = params.edgeGlow;
     this.outlinePass.edgeThickness = params.edgeThickness;
     this.outlinePass.pulsePeriod = params.pulsePeriod;
-    this.outlinePass.visibleEdgeColor.set("#f00");
+    this.outlinePass.visibleEdgeColor.set("#ff0");
     this.outlinePass.selectedObjects = this.selectedObjects;
 
     this.afterimagePass = new AfterimagePass(); // 物体运动时产生残影效果
-    this.afterimagePass.uniforms["damp"].value = 0.97;
-    this.composer.addPass(this.afterimagePass);
+    this.afterimagePass.uniforms["damp"].value = 0.98;
+    // this.composer.addPass(this.afterimagePass);
     this.composer.render();
+
+    const bloomParams = {
+      bloomStrength: 1.1, // 光晕强度
+      bloomThreshold: 0, // 光晕阈值
+      bloomRadius: 0, // 光晕半径
+    };
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      1.5,
+      0.4,
+      0.85
+    );
+    bloomPass.threshold = bloomParams.bloomThreshold;
+    bloomPass.strength = bloomParams.bloomStrength;
+    bloomPass.radius = bloomParams.bloomRadius;
+    this.composer.addPass(bloomPass);
   }
 
   /**

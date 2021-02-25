@@ -139,20 +139,20 @@ export default {
         lightConfig: {
           point:{
             pos:[100, 20, 50],
-            color: '#fff'
+            color: '#00f'
           }
         },
         flyLineConfig: {
-          colors: ["rgb(255,255,0)"],
-          // colors: ["rgb(245,127,127)", "rgb(255,0,0)", "rgb(245,127,127)"],
+          // colors: ["rgb(255,255,0)"],
+          colors: ["rgb(241,241,122)",  "rgb(241,241,122)", "rgb(255,255,0)"],
           pointLength: 90,
           moveLength: 6,
-          width: 1,
-          lightLineWidth: 4,
+          width: 2,
+          lightLineWidth: 3,
           opacity: 1
         },
         animateConfig: {
-          time: 30,
+          time: 10,
         }
       })
       
