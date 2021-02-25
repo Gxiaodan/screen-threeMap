@@ -117,16 +117,10 @@ export default class ThreeMapLightBar extends ThreeMap {
    * @desc 绘制6边形
    */
   drawSixMesh(x, y, z, i, size = 5) {
-    // const geometry = new THREE.CircleGeometry(0.5, size);
-    const geometry = new THREE.BoxGeometry(1, 4, 1, 4, 4, 4);
-    let map = new THREE.TextureLoader().load(this.modelConfig.barModel.map);
-    const material = new THREE.MeshBasicMaterial({
-      map: map,
-    });
+    const geometry = new THREE.CircleGeometry(0.5, size);
+    const material = new THREE.MeshBasicMaterial({ color: this.colors[i % 2] });
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.rotation.x = 1.6;
-    mesh.rotation.y = 0.5;
-    mesh.position.set(x, y, z + this.modelConfig.height + 2.3);
+    mesh.position.set(x, y, z + this.modelConfig.height + 0.1);
     return mesh;
   }
 
@@ -142,7 +136,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     });
     geometry.vertices.shift();
     const line = new THREE.LineLoop(geometry, material);
-    line.position.set(x, y, z + this.modelConfig.height + 0.3);
+    line.position.set(x, y, z + this.modelConfig.height + 0.1);
     return line;
   }
 
@@ -159,7 +153,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     const mesh = new THREE.Mesh(geometry, material);
     mesh.rotation.x = 1.6;
     mesh.rotation.y = 0.5;
-    mesh.position.set(x, y, z + this.modelConfig.height + 2.3);
+    mesh.position.set(x, y, z + this.modelConfig.height + hei / 2 + 0.1);
     return mesh;
   }
 
@@ -217,7 +211,6 @@ export default class ThreeMapLightBar extends ThreeMap {
       // 绘制柱子
       const barMesh = this.drawPlane(x, y, z, d.value, i);
       group.add(barMesh);
-      // group.add(plane1);
     });
 
     this.sixLineGroup = sixLineGroup;
@@ -266,7 +259,7 @@ export default class ThreeMapLightBar extends ThreeMap {
           new THREE.Vector3(d.curve[0].x, d.curve[0].y, d.curve[0].z),
           new THREE.Vector3(d.curve[1].x, d.curve[1].y, d.curve[1].z)
         );
-      const points = curve.getPoints(this.flyLineConfig.pointLength);
+      const points = curve.getPoints(this.flyLineConfig.pointLength - 1);
       const geometry = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
       // geometry.vertices = points;
       const positions = [];
@@ -289,7 +282,7 @@ export default class ThreeMapLightBar extends ThreeMap {
         vertexColors: true, // 是否使用顶点着色 THREE.NoColors THREE.VertexColors THREE.FaceColors
         transparent: true,
         linewidth: this.flyLineConfig.width,
-        linecap: "butt", // 线两端的样式
+        // linecap: "butt", // 线两端的样式
         // linejoin: "round", // 线连接节点的样式
         opacity: this.flyLineConfig.opacity,
         lights: false, // 材质是否受到光照的影响

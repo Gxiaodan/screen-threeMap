@@ -9,6 +9,8 @@ import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
+import { AfterimagePass } from "three/examples/jsm/postprocessing/AfterimagePass.js";
 import {
   CSS2DRenderer,
   CSS2DObject,
@@ -139,11 +141,11 @@ export default class ThreeMap {
     this.camera.lookAt(0, 0, 0);
     this.setCamera(this.cameraConfig.pos);
     this.setLight(this.lightConfig);
-    this.setRender();
     this.initLabel();
 
     this.setHelper();
     this.drawMap();
+    this.setRender();
 
     this.setControl();
 
@@ -161,8 +163,16 @@ export default class ThreeMap {
       this.mousewheel.bind(this),
       false
     );
-  }
+    window.addEventListener("resize", () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
 
+      this.camera.aspect = this.cameraConfig.aspect;
+      this.camera.updateProjectionMatrix();
+      this.labelRenderer.setSize(width, height);
+      this.renderer.setSize(width, height);
+    });
+  }
   // 页面固定label添加
   mapFixedLabel() {
     // const arrowTexture = new THREE.TextureLoader().load(lineImg);
@@ -394,6 +404,7 @@ export default class ThreeMap {
           const mesh = this.drawModel(points);
           g.add(mesh);
         }
+        // this.selectedObjects.push(mesh[ 0 ].object)
       });
       group.add(g);
     });
@@ -414,6 +425,30 @@ export default class ThreeMap {
     // var group1 = this.group.clone(); //克隆网格模型
     // group1.position.z = 0;
     // this.scene.add(group1);
+
+    const tubePoints = [
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, 20, 0),
+      new THREE.Vector3(20, 0, 20),
+      new THREE.Vector3(0, 0, 20),
+    ];
+
+    // CatmullRomCurve3创建一条平滑的三维样条曲线
+    const curve = new THREE.CatmullRomCurve3(tubePoints); // 曲线路径
+    const tubeMaterial = new THREE.MeshBasicMaterial({
+      // map: this.texture,
+      color: "#ea6262",
+      shadowSide: THREE.BackSide,
+      transparent: true,
+      polygonOffset: true,
+    });
+    // 创建管道
+    const tubeGeometry = new THREE.TubeGeometry(curve, 80, 0.05, 50, false); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
+
+    const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
+    this.scene.add(tubeMesh);
+    this.selectedObjects = [];
+    this.selectedObjects.push(tubeMesh);
   }
 
   /*
@@ -651,11 +686,11 @@ export default class ThreeMap {
     requestAnimationFrame(this.animate.bind(this));
     // required if controls.enableDamping or controls.autoRotate are set to true
     this.controls.update();
-    this.renderer.render(this.scene, this.camera);
     if ((!this.isControl && this.isFirst) || this.isControl) {
       this.labelRenderer.render(this.scene, this.camera);
       this.isFirst = false;
     }
+    this.composer.render();
     // this.labelControls.update();
     this.doAnimate && this.doAnimate.bind(this)();
     // console.log(this.camera, "camera");
@@ -749,6 +784,37 @@ export default class ThreeMap {
     // const renderScene = new RenderPass(this.scene, this.camera);
     // this.composer.addPass(renderScene);
     // this.composer.render();
+    this.composer = new EffectComposer(this.renderer);
+
+    const renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(renderPass);
+
+    this.outlinePass = new OutlinePass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      this.scene,
+      this.camera
+    );
+    this.composer.addPass(this.outlinePass);
+
+    const params = {
+      edgeStrength: 4.0,
+      edgeGlow: 0.0,
+      edgeThickness: 2.5,
+      pulsePeriod: 0,
+      rotate: false,
+      usePatternTexture: false,
+    };
+    this.outlinePass.edgeStrength = params.edgeStrength;
+    this.outlinePass.edgeGlow = params.edgeGlow;
+    this.outlinePass.edgeThickness = params.edgeThickness;
+    this.outlinePass.pulsePeriod = params.pulsePeriod;
+    this.outlinePass.visibleEdgeColor.set("#f00");
+    this.outlinePass.selectedObjects = this.selectedObjects;
+
+    this.afterimagePass = new AfterimagePass(); // 物体运动时产生残影效果
+    this.afterimagePass.uniforms["damp"].value = 0.97;
+    this.composer.addPass(this.afterimagePass);
+    this.composer.render();
   }
 
   /**
