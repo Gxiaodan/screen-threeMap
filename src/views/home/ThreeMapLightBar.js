@@ -284,6 +284,7 @@ export default class ThreeMapLightBar extends ThreeMap {
         vertexColors: true, // 是否使用顶点着色 THREE.NoColors THREE.VertexColors THREE.FaceColors
         transparent: true,
         linewidth: this.flyLineConfig.width,
+        depthTest: false,
         // linecap: "butt", // 线两端的样式
         // linejoin: "round", // 线连接节点的样式
         opacity: this.flyLineConfig.opacity,
@@ -326,6 +327,9 @@ export default class ThreeMapLightBar extends ThreeMap {
       material1.linewidth = this.flyLineConfig.lightLineWidth;
       const mesh1 = new Line2(geometry1, material1);
       mesh1.userData.positions = positions;
+      let layer1 = new THREE.Layers();
+      layer1.set(1);
+      mesh.layers = layer1;
       group.add(mesh);
       group1.add(mesh1);
     });
@@ -338,7 +342,9 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.scene.add(this.flyGroup1);
     this.selectedObjects.push(this.flyGroup);
     this.outlinePass.selectedObjects = this.selectedObjects;
-    this.composer.render();
+    // let layer1 = new THREE.Layers();
+    // layer1.set(1);
+    // this.flyGroup.layers = layer1;
   }
 
   drawBorderMesh(borderData) {
@@ -387,9 +393,8 @@ export default class ThreeMapLightBar extends ThreeMap {
     lineGroup.position.z = this.modelConfig.height;
     this.selectedObjects.push(lineGroup);
     this.outlinePass.selectedObjects = this.selectedObjects;
-    this.composer.render();
 
-    // this.scene.add(meshGroup);
+    this.scene.add(meshGroup);
     if (this.mirrorConfig.isShow) this.scene.add(mirrorGroup);
     if (this.borderLineConfig.isShow) this.scene.add(lineGroup);
   }

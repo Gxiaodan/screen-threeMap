@@ -420,15 +420,7 @@ export default class ThreeMap {
       this.lineConfig.width
     );
     lineGroup.position.z = this.modelConfig.height + 0.06;
-    // this.scene.add(lineGroup);
-    // const lineGroupBottom = lineGroup.clone();
-    // lineGroupBottom.position.z = -0.01;
-    // this.scene.add(lineGroupBottom);
-    // this.group.position.z = 2;
-    // this.scene.add(this.group);
-    // var group1 = this.group.clone(); //克隆网格模型
-    // group1.position.z = 0;
-    // this.scene.add(group1);
+    this.scene.add(lineGroup, this.group);
 
     //===============创建管道练习
     // const tubePoints = [
@@ -687,17 +679,20 @@ export default class ThreeMap {
       });
     }
     requestAnimationFrame(this.animate.bind(this));
+
+    this.renderer.clear();
+    this.camera.layers.set(1);
+    this.composer.render();
+    this.renderer.clearDepth(); // 清除深度缓存
+    this.camera.layers.set(0);
+    this.renderer.render(this.scene, this.camera);
     // required if controls.enableDamping or controls.autoRotate are set to true
     this.controls.update();
-    if ((!this.isControl && this.isFirst) || this.isControl) {
-      this.labelRenderer.render(this.scene, this.camera);
-      this.isFirst = false;
-    }
-    this.composer.render();
-    // this.labelControls.update();
+    // if ((!this.isControl && this.isFirst) || this.isControl) {
+    //   this.labelRenderer.render(this.scene, this.camera);
+    //   this.isFirst = false;
+    // }
     this.doAnimate && this.doAnimate.bind(this)();
-    // console.log(this.camera, "camera");
-    // console.log(this.scene, 'this.scene')
   }
 
   /**
@@ -776,6 +771,7 @@ export default class ThreeMap {
    */
   setRender() {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.renderer.autoClear = false;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -820,7 +816,7 @@ export default class ThreeMap {
     this.afterimagePass = new AfterimagePass(); // 物体运动时产生残影效果
     this.afterimagePass.uniforms["damp"].value = 0.98;
     // this.composer.addPass(this.afterimagePass);
-    this.composer.render();
+    // this.composer.render();
 
     const bloomParams = {
       bloomStrength: 1.1, // 光晕强度
