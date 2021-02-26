@@ -10,6 +10,8 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { AfterimagePass } from "three/examples/jsm/postprocessing/AfterimagePass.js";
 
@@ -775,6 +777,9 @@ export default class ThreeMap {
   setRender() {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+
     this.renderer.setClearColor(0xffffff, 0.0);
     this.renderer.domElement.style.position = "absolute";
     // this.renderer.physicallyCorrectLights = true;
@@ -832,6 +837,13 @@ export default class ThreeMap {
     bloomPass.strength = bloomParams.bloomStrength;
     bloomPass.radius = bloomParams.bloomRadius;
     this.composer.addPass(bloomPass);
+
+    let effectFXAA = new ShaderPass(FXAAShader);
+    effectFXAA.uniforms.resolution.value.set(
+      1 / window.innerWidth,
+      1 / window.innerHeight
+    );
+    this.composer.addPass(effectFXAA);
   }
 
   /**
