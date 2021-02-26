@@ -12,7 +12,7 @@ import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLigh
 import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
-import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+// import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { AfterimagePass } from "three/examples/jsm/postprocessing/AfterimagePass.js";
 
 import {
@@ -420,12 +420,12 @@ export default class ThreeMap {
       this.lineConfig.width
     );
     lineGroup.position.z = this.modelConfig.height + 0.06;
-    // this.scene.add(lineGroup);
+    this.scene.add(lineGroup);
     // const lineGroupBottom = lineGroup.clone();
     // lineGroupBottom.position.z = -0.01;
     // this.scene.add(lineGroupBottom);
     // this.group.position.z = 2;
-    // this.scene.add(this.group);
+    this.scene.add(this.group);
     // var group1 = this.group.clone(); //克隆网格模型
     // group1.position.z = 0;
     // this.scene.add(group1);
@@ -694,7 +694,6 @@ export default class ThreeMap {
       this.isFirst = false;
     }
     this.composer.render();
-    // this.labelControls.update();
     this.doAnimate && this.doAnimate.bind(this)();
     // console.log(this.camera, "camera");
     // console.log(this.scene, 'this.scene')
@@ -800,7 +799,7 @@ export default class ThreeMap {
       this.scene,
       this.camera
     );
-    // this.composer.addPass(this.outlinePass);
+    this.composer.addPass(this.outlinePass);
 
     const params = {
       edgeStrength: 1.8,
@@ -822,21 +821,21 @@ export default class ThreeMap {
     // this.composer.addPass(this.afterimagePass);
     this.composer.render();
 
-    const bloomParams = {
-      bloomStrength: 1.1, // 光晕强度
-      bloomThreshold: 0, // 光晕阈值
-      bloomRadius: 0, // 光晕半径
-    };
-    const bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(window.innerWidth, window.innerHeight),
-      1.5,
-      0.4,
-      0.85
-    );
-    bloomPass.threshold = bloomParams.bloomThreshold;
-    bloomPass.strength = bloomParams.bloomStrength;
-    bloomPass.radius = bloomParams.bloomRadius;
-    this.composer.addPass(bloomPass);
+    // const bloomParams = {
+    //   bloomStrength: 1.1, // 光晕强度
+    //   bloomThreshold: 0, // 光晕阈值
+    //   bloomRadius: 0, // 光晕半径
+    // };
+    // const bloomPass = new UnrealBloomPass(
+    //   new THREE.Vector2(window.innerWidth, window.innerHeight),
+    //   1.5,
+    //   0.4,
+    //   0.85
+    // );
+    // bloomPass.threshold = bloomParams.bloomThreshold;
+    // bloomPass.strength = bloomParams.bloomStrength;
+    // bloomPass.radius = bloomParams.bloomRadius;
+    // this.composer.addPass(bloomPass);
 
     let effectFXAA = new ShaderPass(FXAAShader);
     effectFXAA.uniforms.resolution.value.set(

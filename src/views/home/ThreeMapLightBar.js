@@ -297,24 +297,24 @@ export default class ThreeMapLightBar extends ThreeMap {
       mesh.userData.max = maxValue;
 
       // 管道实现外边缘效果
-      // const tubeCurve = new THREE.CatmullRomCurve3(points); // 曲线路径
-      // const tubeMaterial = new THREE.MeshBasicMaterial({
-      //   color: "#ff0",
-      //   transparent: true,
-      //   polygonOffset: true,
-      // });
+      const tubeCurve = new THREE.CatmullRomCurve3(points); // 曲线路径
+      const tubeMaterial = new THREE.MeshBasicMaterial({
+        color: "#ff0",
+        transparent: true,
+        polygonOffset: true,
+      });
 
-      // // 创建管道
-      // const tubeGeometry = new THREE.TubeGeometry(
-      //   tubeCurve,
-      //   80,
-      //   0.1,
-      //   50,
-      //   false
-      // ); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
+      // 创建管道
+      const tubeGeometry = new THREE.TubeGeometry(
+        tubeCurve,
+        80,
+        0.1,
+        50,
+        false
+      ); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
 
-      // const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
-      // group.add(tubeMesh);
+      const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
+      group.add(tubeMesh);
 
       const geometry1 = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
       // geometry1.setPositions(positions.splice(0,30));
@@ -326,7 +326,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       material1.linewidth = this.flyLineConfig.lightLineWidth;
       const mesh1 = new Line2(geometry1, material1);
       mesh1.userData.positions = positions;
-      group.add(mesh);
+      // group.add(mesh);
       group1.add(mesh1);
     });
     this.flyGroup = group;
