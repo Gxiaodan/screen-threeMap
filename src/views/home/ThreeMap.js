@@ -819,7 +819,7 @@ export default class ThreeMap {
     // this.composer.render();
 
     const bloomParams = {
-      bloomStrength: 1.1, // 光晕强度
+      bloomStrength: 4, // 光晕强度
       bloomThreshold: 0, // 光晕阈值
       bloomRadius: 0, // 光晕半径
     };

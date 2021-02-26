@@ -342,9 +342,6 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.scene.add(this.flyGroup1);
     this.selectedObjects.push(this.flyGroup);
     this.outlinePass.selectedObjects = this.selectedObjects;
-    // let layer1 = new THREE.Layers();
-    // layer1.set(1);
-    // this.flyGroup.layers = layer1;
   }
 
   drawBorderMesh(borderData) {
