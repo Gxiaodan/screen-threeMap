@@ -157,11 +157,11 @@ export default class ThreeMap {
 
     // this.lineAnimate()
     this.mapCon.addEventListener("mouseup", this.mouseEvent.bind(this), false);
-    this.mapCon.addEventListener(
-      "mousemove",
-      this.mouseEvent.bind(this),
-      false
-    );
+    // this.mapCon.addEventListener(
+    //   "mousemove",
+    //   this.mouseEvent.bind(this),
+    //   false
+    // );
     this.mapCon.addEventListener(
       "mousewheel",
       this.mousewheel.bind(this),
@@ -254,10 +254,11 @@ export default class ThreeMap {
     }
     if (!this.meshes) {
       this.meshes = [];
-      this.group.children.forEach((g) => {
-        g.children.forEach((mesh) => {
-          this.meshes.push(mesh);
-        });
+      this.flyGroup.children.forEach((g) => {
+        // g.children.forEach((mesh) => {
+        let mesh = g;
+        this.meshes.push(mesh);
+        // });
       });
     }
 
@@ -273,9 +274,15 @@ export default class ThreeMap {
     if (this.intersects.length > 0) {
       console.log(this.intersects, "======");
       // this.labelRenderer.domElement.style.display = "block";
+      // this.clickFunction(
+      //   event,
+      //   this.intersects[0].object.parent,
+      //   this.intersects[0].point
+      // );
+      //线条点击事件
       this.clickFunction(
         event,
-        this.intersects[0].object.parent,
+        this.intersects[0].object,
         this.intersects[0].point
       );
     } else {
@@ -325,7 +332,10 @@ export default class ThreeMap {
       // mesh.material[0].color.set(color);
     });
   }
-
+  setLineColor(mesh) {
+    let colors = ["#f00", "#ff0"];
+    mesh.material.color.set(colors[0]);
+  }
   setLabelPos(g, type, p) {
     // 设置提示框位置
     this.provinceName = g.data.properties.name;

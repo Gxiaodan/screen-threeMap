@@ -239,7 +239,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     const group1 = group.clone();
     group.name = "飞线";
     const maxValue = Math.max(...this.flyDatas.map((item) => item.value));
-    this.flyDatas.forEach((d) => {
+    this.flyDatas.forEach((d, index) => {
       // 源和目标省份的经纬度
       const slnglat = this.dataKeys[d.source.name];
       const value = d.value;
@@ -302,6 +302,7 @@ export default class ThreeMapLightBar extends ThreeMap {
         color: "#ff0",
         transparent: true,
         polygonOffset: true,
+        side: THREE.DoubleSide,
       });
 
       // 创建管道
@@ -314,6 +315,8 @@ export default class ThreeMapLightBar extends ThreeMap {
       ); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
 
       const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
+      tubeMesh.name = "飞线" + index;
+      tubeMesh.userData = { index: index };
       group.add(tubeMesh);
 
       const geometry1 = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes

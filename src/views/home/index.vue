@@ -164,6 +164,7 @@ export default {
           _this.provinceName = map.provinceName
           // map.setAreaColor(g);
         } else if (type == 'mouseup') {
+          map.setLineColor(g, type, p)
           // map.setAreaColor(g)
           // map.setLabelPos(g, 'mouseup', p)
         }
