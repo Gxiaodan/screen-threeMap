@@ -13,6 +13,7 @@ import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { BokehPass } from "three/examples/jsm/postprocessing/BokehPass.js";
 import { AfterimagePass } from "three/examples/jsm/postprocessing/AfterimagePass.js";
 
 import {
@@ -564,9 +565,12 @@ export default class ThreeMap {
         amount: 0.01, // 拉伸长度，默认100
         bevelEnabled: false, // 对挤出的形状应用是否斜角
       });
+      const WIDTH = window.innerWidth;
+      const HEIGHT = window.innerHeight;
       const groundMirror = new Reflector(geometry, {
-        // color: '#000',
         clipBias: 0.003,
+        textureWidth: WIDTH * window.devicePixelRatio,
+        textureHeight: HEIGHT * window.devicePixelRatio,
       });
       return groundMirror;
     } else {
@@ -686,6 +690,7 @@ export default class ThreeMap {
     this.renderer.clearDepth(); // 清除深度缓存
     this.camera.layers.set(0);
     this.renderer.render(this.scene, this.camera);
+    this.labelRenderer.render(this.scene, this.camera);
     // required if controls.enableDamping or controls.autoRotate are set to true
     this.controls.update();
     // if ((!this.isControl && this.isFirst) || this.isControl) {
@@ -840,6 +845,16 @@ export default class ThreeMap {
       1 / window.innerHeight
     );
     this.composer.addPass(effectFXAA);
+
+    let bokehPass = new BokehPass(this.scene, this.camera, {
+      focus: 10.0,
+      aperture: 2.5,
+      maxblur: 0.01,
+
+      // width: window.innerWidth,
+      // height: window.innerHeight,
+    });
+    // this.composer.addPass(bokehPass);
   }
 
   /**

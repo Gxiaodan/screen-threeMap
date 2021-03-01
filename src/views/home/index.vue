@@ -91,10 +91,10 @@ export default {
       // ],
       flyDatas: [
         { source: { name: '北京' }, target: { name: '西安' }, value: 150 },
-        { source: { name: '上海' }, target: { name: '西安' },value: 70 },
-        { source: { name: '徐州' }, target: { name: '西安' },value: 70 },
-        { source: { name: '杭州' }, target: { name: '西安' }, value: 70 },
-        { source: { name: '遵义' }, target: { name: '西安' }, value: 70 },
+        // { source: { name: '上海' }, target: { name: '西安' },value: 70 },
+        // { source: { name: '徐州' }, target: { name: '西安' },value: 70 },
+        // { source: { name: '杭州' }, target: { name: '西安' }, value: 70 },
+        // { source: { name: '遵义' }, target: { name: '西安' }, value: 70 },
         { source: { name: '和田' }, target: { name: '西安' }, value: 200}
       ]
     }
@@ -122,8 +122,8 @@ export default {
           far: 100000,
           pos: { x: 396, y: 12, z: 167 }
         },
-        helperConfig: { isShow: false, length: 30 },
-        mirrorConfig: { isShow: false},
+        helperConfig: { isShow: true, length: 30 },
+        mirrorConfig: { isShow: true},
         borderLineConfig: { isShow: false},
         modelConfig: {
           topModel:{opacity: 0.5,map: topImg},

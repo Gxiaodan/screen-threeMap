@@ -296,6 +296,11 @@ export default class ThreeMapLightBar extends ThreeMap {
       const mesh = new Line2(geometry, material);
       mesh.userData.value = value;
       mesh.userData.max = maxValue;
+      let layer1 = new THREE.Layers();
+      layer1.set(1);
+      mesh.layers = layer1;
+      mesh.renderOrder = 99;
+      mesh.renderDepth = 99;
 
       // 管道实现外边缘效果
       // const tubeCurve = new THREE.CatmullRomCurve3(points); // 曲线路径
@@ -327,9 +332,6 @@ export default class ThreeMapLightBar extends ThreeMap {
       material1.linewidth = this.flyLineConfig.lightLineWidth;
       const mesh1 = new Line2(geometry1, material1);
       mesh1.userData.positions = positions;
-      let layer1 = new THREE.Layers();
-      layer1.set(1);
-      mesh.layers = layer1;
       group.add(mesh);
       group1.add(mesh1);
     });
@@ -380,13 +382,14 @@ export default class ThreeMapLightBar extends ThreeMap {
         // const lineMesh = this.drawLine(point, "#f00", 2);
         // lineGroup.add(lineMesh);
         meshGroup.add(mesh);
+        mirrorMesh.layers.set(2);
         mirrorGroup.add(mirrorMesh);
       });
     });
 
     meshGroup.position.z = this.modelConfig.height + 0.02;
     mirrorGroup.position.z = 0;
-    mirrorGroup.position.x = 1;
+    mirrorGroup.position.x = 5;
     lineGroup.position.z = this.modelConfig.height;
     this.selectedObjects.push(lineGroup);
     this.outlinePass.selectedObjects = this.selectedObjects;
