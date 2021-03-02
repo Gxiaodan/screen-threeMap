@@ -97,7 +97,6 @@ export default class ThreeMapLightBar extends ThreeMap {
         // d.geometry.setColors(colorList);
         // d.geometry.colorsNeedUpdate = true;
       });
-
     this.sixLineGroup &&
       this.sixLineGroup.children.forEach((d) => {
         d.scale.set(1 + ratio, 1 + ratio, d.scale.z);
@@ -111,6 +110,10 @@ export default class ThreeMapLightBar extends ThreeMap {
     // this.testMesh.rotateZ(Math.PI / 2);
     // this.testMesh.rotateZ(0.05);
     // this.testMesh.rotation.z = (this.colorIndex * Math.PI) / 5;
+    this.cylinder.scale.set(1 + ratio, 1 + ratio, 1 + ratio);
+    this.cylinder.material[0].opacity = 1 - ratio;
+    this.ballSphere.scale.set(1 + 3 * ratio, 1 + 3 * ratio, 1 + 3 * ratio);
+    this.ballSphere.material[0].opacity = 1 - ratio;
   }, this.animateConfig.time);
 
   /**
@@ -132,7 +135,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     const geometry = new THREE.CircleGeometry(r, 20);
     const material = new THREE.MeshBasicMaterial({
       color: this.colors[i % 2],
-      transparent: false,
+      transparent: true,
     });
     geometry.vertices.shift();
     const line = new THREE.LineLoop(geometry, material);
@@ -151,7 +154,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       map: map,
     });
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.rotation.x = 1.6;
+    mesh.rotation.x = Math.PI / 2;
     mesh.rotation.y = 0.5;
     mesh.position.set(x, y, z + this.modelConfig.height + hei / 2 + 0.1);
     return mesh;
@@ -394,7 +397,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.selectedObjects.push(lineGroup);
     this.outlinePass.selectedObjects = this.selectedObjects;
 
-    this.scene.add(meshGroup);
+    // this.scene.add(meshGroup);
     if (this.mirrorConfig.isShow) this.scene.add(mirrorGroup);
     if (this.borderLineConfig.isShow) this.scene.add(lineGroup);
   }

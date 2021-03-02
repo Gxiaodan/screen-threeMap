@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <video class="bgvid" id="bgvid" autoplay muted loop>
+    <!-- <video class="bgvid" id="bgvid" autoplay muted loop>
       <source src="@/assets/img/bg.webm" type="video/webm" />
-    </video>
+    </video> -->
     <div class="main-con">
       <div class="wheel-con">
         <div v-for="(item, index) in wheelData" :key="index" class="sub-tit" :class="{'active': index == curIndex, 'lastActive': (index + 1) % wheelData.length == curIndex}">
@@ -42,6 +42,7 @@ import './index.less'
 import topImg from '@/assets/img/top.png'
 import barImg from '@/assets/img/barImg.png'
 import sideImg from '@/assets/img/side.png'
+import lightSideImg from '@/assets/img/barSide.png'
 import ThreeMapLightBar from './ThreeMapLightBar.js'
 import ThreeMap from './ThreeMap.js'
 import { util } from './util'
@@ -128,6 +129,7 @@ export default {
         modelConfig: {
           topModel:{opacity: 0.5,map: topImg},
           sideModel:{opacity: 1,map: sideImg},
+          lightModel: {map: lightSideImg},
           height: 3,
           barModel: {map:barImg}
         },
@@ -152,7 +154,7 @@ export default {
           opacity: 1
         },
         animateConfig: {
-          time: 10,
+          time: 5,
         }
       })
       

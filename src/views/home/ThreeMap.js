@@ -445,6 +445,70 @@ export default class ThreeMap {
     // const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
     // this.scene.add(tubeMesh);
     // this.selectedObjects.push(tubeMesh);
+
+    let option = {
+      R: 2,
+      H: 3,
+      A: 20,
+      img: this.modelConfig.lightModel.map,
+    };
+
+    const geometry = new THREE.CylinderGeometry(
+      option.R,
+      option.R,
+      option.H,
+      option.A
+    );
+
+    let sideTexture = new THREE.TextureLoader().load(option.img);
+    sideTexture.wrapS = sideTexture.wrapT = THREE.RepeatWrapping;
+
+    this.cylinder = new THREE.Mesh(geometry, [
+      new THREE.MeshBasicMaterial({
+        map: sideTexture,
+        side: THREE.DoubleSide,
+        transparent: true,
+      }),
+      new THREE.MeshBasicMaterial({
+        transparent: true,
+        opacity: 0,
+        side: THREE.DoubleSide,
+      }),
+      new THREE.MeshBasicMaterial({
+        transparent: true,
+        opacity: 0,
+        side: THREE.DoubleSide,
+      }),
+    ]);
+    this.cylinder.position.set(
+      0,
+      0,
+      option.H / 2 + this.modelConfig.height + 0.02
+    );
+    this.cylinder.rotation.x = Math.PI / 2;
+    this.scene.add(this.cylinder);
+
+    const barGeometry = new THREE.SphereGeometry(
+      option.R,
+      20,
+      20,
+      0,
+      Math.PI * 2,
+      0,
+      Math.PI / 2
+    );
+    this.ballSphere = new THREE.Mesh(barGeometry, [
+      new THREE.MeshBasicMaterial({
+        map: sideTexture,
+        depthTest: false,
+        side: THREE.DoubleSide,
+        transparent: true,
+      }),
+    ]);
+    this.ballSphere.position.set(-5, -15, this.modelConfig.height + 1);
+    this.ballSphere.rotation.x = Math.PI / 2;
+    // this.ballSphere.layers.set(1);
+    this.scene.add(this.ballSphere);
   }
 
   /*
@@ -684,15 +748,15 @@ export default class ThreeMap {
     }
     requestAnimationFrame(this.animate.bind(this));
 
-    this.renderer.clear();
-    this.camera.layers.set(1);
+    // this.renderer.clear();
+    // this.camera.layers.set(1);
     this.composer.render();
-    this.renderer.clearDepth(); // 清除深度缓存
-    this.camera.layers.set(0);
+    // this.renderer.clearDepth(); // 清除深度缓存
+    // this.camera.layers.set(0);
     this.renderer.render(this.scene, this.camera);
     this.labelRenderer.render(this.scene, this.camera);
     // required if controls.enableDamping or controls.autoRotate are set to true
-    this.controls.update();
+    // this.controls.update();
     // if ((!this.isControl && this.isFirst) || this.isControl) {
     //   this.labelRenderer.render(this.scene, this.camera);
     //   this.isFirst = false;
@@ -756,7 +820,7 @@ export default class ThreeMap {
       var point = new THREE.PointLight(config.point.color);
       let pos = config.point.pos;
       point.position.set(pos[0], pos[1], pos[2]); // 点光源位置
-      this.scene.add(point); // 点光源添加到场景中
+      // this.scene.add(point); // 点光源添加到场景中
       // let point1 = point.clone();
       // point.position.set(-pos[0], -pos[1], pos[2]);
       // this.scene.add(point1);
@@ -769,6 +833,14 @@ export default class ThreeMap {
     const rectLight1 = new THREE.RectAreaLight(0xff0000, 5, 40, 1); // 平面光光源
     rectLight1.position.set(-30, -10, 20);
     // this.scene.add(rectLight1);
+
+    // 创建一个点光源
+    this._pointlight = new THREE.PointLight("red");
+    this._pointlight.intensity = 20;
+    this._pointlight.decay = 1;
+    this._pointlight.distance = 2;
+    this._pointlight.position.set(0, 0, 4);
+    // this.scene.add(this._pointlight);
   }
 
   /**
@@ -820,8 +892,8 @@ export default class ThreeMap {
 
     this.afterimagePass = new AfterimagePass(); // 物体运动时产生残影效果
     this.afterimagePass.uniforms["damp"].value = 0.98;
-    // this.composer.addPass(this.afterimagePass);
-    // this.composer.render();
+    this.composer.addPass(this.afterimagePass);
+    this.composer.render();
 
     const bloomParams = {
       bloomStrength: 4, // 光晕强度
@@ -837,7 +909,7 @@ export default class ThreeMap {
     bloomPass.threshold = bloomParams.bloomThreshold;
     bloomPass.strength = bloomParams.bloomStrength;
     bloomPass.radius = bloomParams.bloomRadius;
-    this.composer.addPass(bloomPass);
+    // this.composer.addPass(bloomPass);
 
     let effectFXAA = new ShaderPass(FXAAShader);
     effectFXAA.uniforms.resolution.value.set(
