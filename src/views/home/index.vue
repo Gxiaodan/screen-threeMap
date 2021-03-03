@@ -42,7 +42,7 @@ import './index.less'
 import topImg from '@/assets/img/top.png'
 import barImg from '@/assets/img/barImg.png'
 import sideImg from '@/assets/img/side.png'
-import lightSideImg from '@/assets/img/barSide.png'
+import lightSideImg from '@/assets/img/barSide1.png'
 import ThreeMapLightBar from './ThreeMapLightBar.js'
 import ThreeMap from './ThreeMap.js'
 import { util } from './util'
@@ -72,7 +72,7 @@ export default {
         { name: '遵义', value: 200, coordinates:[116.9, 27.7], id: "label-003"},
         { name: '和田', value: 250, coordinates:[79.94, 37.12], id: "label-004"},
         { name: '杭州', value: 150, coordinates:[120.19, 30.26], id: "label-005"},
-        { name: '西安', value: 50, coordinates:[108.948024, 34.263161], id: "label-006"},
+        { name: '西安', value: 250, coordinates:[108.948024, 34.263161], id: "label-006"},
         { name: '上海', value: 73, coordinates:[121.472644, 31.231706], id: "label-007"}
       ],
        datas: [
@@ -97,7 +97,8 @@ export default {
         // { source: { name: '杭州' }, target: { name: '西安' }, value: 70 },
         // { source: { name: '遵义' }, target: { name: '西安' }, value: 70 },
         { source: { name: '和田' }, target: { name: '西安' }, value: 200}
-      ]
+      ],
+      map: null
     }
   },
   mounted() {
@@ -109,7 +110,7 @@ export default {
       // const mapData = JSON.parse(data)
       console.log(mapData)
       // _this.initMap(jsonData)
-      const map = new ThreeMapLightBar({ 
+      this.map = new ThreeMapLightBar({ 
         mapData, 
         flyDatas: _this.flyDatas,
         isControl: true,
@@ -159,7 +160,7 @@ export default {
       })
       
       _this.endVal = 18181185
-      map.on('mouseFn', (e, g, p) => {
+      this.map.on('mouseFn', (e, g, p) => {
         const type = e.type
         if (type == 'mousemove') {
           // map.setLabelPos(g, 'mousemove', p)
@@ -170,19 +171,22 @@ export default {
           // map.setLabelPos(g, 'mouseup', p)
         }
       })
-      map.mapFixedLabel()
+      this.map.mapFixedLabel()
 
       // 绘制光柱
-      map.drawLightBar()
+      this.map.drawLightBar()
 
       // 绘制线条
-      map.drawFlyLine()
+      this.map.drawFlyLine()
     })
     setInterval(() => {
       this.curIndex =  (this.curIndex + 1) % this.wheelData.length      
     }, 2000);
   },
   created() {},
+  beforeDestory(){
+    this.map.dispose()
+  },
   methods: {}
 }
 </script>
