@@ -110,7 +110,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     // this.testMesh.rotateZ(Math.PI / 2);
     // this.testMesh.rotateZ(0.05);
     // this.testMesh.rotation.z = (this.colorIndex * Math.PI) / 5;
-    this.cylinder.scale.set(1 + ratio, 1 + ratio, 1 + ratio);
+    this.cylinder.scale.set(1 + 3 * ratio, 1 + 3 * ratio, 1 + 3 * ratio);
     this.cylinder.material[0].opacity = 1 - ratio;
     this.ballSphere.scale.set(1 + 3 * ratio, 1 + 3 * ratio, 1 + 3 * ratio);
     this.ballSphere.material[0].opacity = 1 - ratio;
