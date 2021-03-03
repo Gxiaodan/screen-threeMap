@@ -10,6 +10,62 @@
     <script src="./config.js"></script>
 </head>
 <body>
+    <!-- <script id="vertexShader" type="x-shader/x-vertex">
+        varying vec3 vNormal;
+        varying vec3 vPositionNormal;
+        void main() 
+        {
+        vNormal = normalize( normalMatrix * normal ); // 转换到视图空间
+        vPositionNormal = normalize(( modelViewMatrix * vec4(position, 1.0) ).xyz);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+        }
+    </script> -->
+    <script id="vertexShader" type="x-shader/x-vertex">
+        varying vec3 vNormal;
+        varying vec3 vPositionNormal;
+        varying vec2 vUv;
+        void main() 
+        {
+            vUv = uv;
+            vNormal = normalize( normalMatrix * normal ); // 转换到视图空间
+            vPositionNormal = normalize(( modelViewMatrix * vec4(position, 1.0) ).xyz);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+        }
+
+    </script>
+        <!-- fragment shader a.k.a. pixel shader -->
+    <!-- <script id="fragmentShader" type="x-shader/x-vertex"> 
+        uniform vec3 glowColor;
+        uniform float b;
+        uniform float p;
+        uniform float s;
+        varying vec3 vNormal;
+        varying vec3 vPositionNormal;
+        void main() 
+        {
+        float a = pow( b + s * abs(dot(vNormal, vPositionNormal)), p );
+        gl_FragColor = vec4( glowColor, a );
+        }
+    </script> -->
+    <script id="fragmentShader" type="x-shader/x-vertex">         
+        uniform vec3 glowColor;
+        uniform float bias;
+        uniform float power;
+        uniform float scale;
+        varying vec3 vNormal;
+        varying vec3 vPositionNormal;
+        uniform sampler2D textureMap;
+        uniform vec2 repeat;
+        varying vec2 vUv;
+        uniform float time;
+        void main() 
+        {
+            float a = pow( bias + scale * abs(dot(vNormal, vPositionNormal)), power );
+            //*(vec2(1.0,time))
+            vec4 mapColor=texture2D( textureMap, vUv*repeat);
+            gl_FragColor = vec4( glowColor*mapColor.rgb, a );
+        }
+    </script>
 <noscript>
     <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
         Please enable it to continue.</strong>

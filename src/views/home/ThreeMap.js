@@ -15,6 +15,8 @@ import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { BokehPass } from "three/examples/jsm/postprocessing/BokehPass.js";
 import { AfterimagePass } from "three/examples/jsm/postprocessing/AfterimagePass.js";
+import { FocusShader } from "three/examples/jsm/shaders/FocusShader.js";
+import { MirrorShader } from "three/examples/jsm/shaders/MirrorShader.js";
 
 import {
   CSS2DRenderer,
@@ -133,7 +135,7 @@ export default class ThreeMap {
     this.mapCon = document.getElementById(this.canvasId);
     this.scene = new THREE.Scene();
     // this.scene.background = new THREE.Color("#7d547c");
-    // this.scene.fog = new THREE.Fog("#0f0", 480, 500);
+    // this.scene.fog = new THREE.Fog("#000", 480, 500);
     this.scene.position.set(this.scenePos.x, this.scenePos.y, this.scenePos.z);
     this.scene.scale.set(1.19, 1.04, 1);
     this.camera = new THREE.PerspectiveCamera(
@@ -230,6 +232,7 @@ export default class ThreeMap {
     this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
     this.labelRenderer.domElement.style.position = "absolute";
     this.labelRenderer.domElement.style.top = "0px";
+    this.labelRenderer.domElement.style.zIndex = 1;
     this.mapCon.appendChild(this.labelRenderer.domElement);
   }
 
@@ -446,6 +449,57 @@ export default class ThreeMap {
     // this.scene.add(tubeMesh);
     // this.selectedObjects.push(tubeMesh);
 
+    this._uniforms = {
+      scale: { type: "f", value: -1.0 },
+      bias: { type: "f", value: 1.0 },
+      power: { type: "f", value: 3.3 },
+      glowColor: { type: "c", value: new THREE.Color(0x00ffff) },
+      textureMap: {
+        value: undefined,
+      },
+      repeat: {
+        type: "v2",
+        value: new THREE.Vector2(30.0, 15.0),
+      },
+      time: {
+        value: 0.0,
+      },
+    };
+
+    let tx = new THREE.TextureLoader().load(this.modelConfig.lightModel.map);
+    // tx.wrapS = THREE.RepeatWrapping;
+    // tx.wrapT = THREE.RepeatWrapping;
+    this._uniforms.textureMap.value = tx;
+
+    let materialFresnel = new THREE.ShaderMaterial({
+      uniforms: this._uniforms,
+      vertexShader: document.getElementById("vertexShader").textContent,
+      fragmentShader: document.getElementById("fragmentShader").textContent,
+      //side: DoubleSide,
+      //blending:AdditiveBlending,
+      transparent: true,
+      depthWrite: false,
+    });
+
+    // var materialFresnel = new THREE.ShaderMaterial({
+    //   uniforms: {
+    //     s: { type: "f", value: -1.0 },
+    //     b: { type: "f", value: 1.0 },
+    //     p: { type: "f", value: 2.0 },
+    //     glowColor: { type: "c", value: new THREE.Color(0x00ffff) },
+    //   },
+    //   vertexShader: document.getElementById("vertexShader").textContent,
+    //   fragmentShader: document.getElementById("fragmentShader").textContent,
+    //   side: THREE.DoubleSide,
+    //   blending: THREE.AdditiveBlending,
+    //   transparent: true,
+    //   // depthTest: false,
+    //   color: "#f00",
+    // });
+    let geometry1 = new THREE.TorusKnotBufferGeometry(10, 3, 100, 32);
+    var torusKnot = new THREE.Mesh(geometry1, materialFresnel);
+    // this.scene.add(torusKnot);
+
     let option = {
       R: 2,
       H: 3,
@@ -466,6 +520,7 @@ export default class ThreeMap {
     this.cylinder = new THREE.Mesh(geometry, [
       new THREE.MeshBasicMaterial({
         map: sideTexture,
+        color: "#0f0",
         side: THREE.DoubleSide,
         transparent: true,
       }),
@@ -490,25 +545,45 @@ export default class ThreeMap {
 
     const barGeometry = new THREE.SphereGeometry(
       option.R,
-      20,
-      20,
+      50,
+      50,
       0,
       Math.PI * 2,
       0,
       Math.PI / 2
     );
-    this.ballSphere = new THREE.Mesh(barGeometry, [
-      new THREE.MeshBasicMaterial({
-        map: sideTexture,
-        depthTest: false,
-        side: THREE.DoubleSide,
-        transparent: true,
-      }),
-    ]);
-    this.ballSphere.position.set(-5, -15, this.modelConfig.height + 1);
+    // this.ballSphere = new THREE.Mesh(barGeometry, [
+    //   new THREE.MeshBasicMaterial({
+    //     map: sideTexture,
+    //     // color: "#ce7112",
+    //     // opacity: 0.8,
+    //     depthTest: false,
+    //     side: THREE.DoubleSide,
+    //     transparent: true,
+    //   }),
+    // ]);
+    this.ballSphere = new THREE.Mesh(barGeometry, [materialFresnel]);
+    this.ballSphere.position.set(0, -10, this.modelConfig.height + 1);
     this.ballSphere.rotation.x = Math.PI / 2;
     // this.ballSphere.layers.set(1);
+    // this.selectedObjects.push(this.ballSphere);
     this.scene.add(this.ballSphere);
+
+    // sprite精灵的应用
+    var textured = new THREE.TextureLoader().load(
+      this.modelConfig.lightModel.map
+    );
+    var spriteMaterial = new THREE.SpriteMaterial({
+      // color: 0xffffff,
+      map: textured,
+    });
+    var sprite = new THREE.Sprite(spriteMaterial);
+    sprite.position.set(0, 0, 20);
+    // console.log(sprite);
+    sprite.scale.x = 10;
+    sprite.scale.y = 5;
+
+    this.scene.add(sprite);
   }
 
   /*
@@ -572,7 +647,7 @@ export default class ThreeMap {
     geometry.setPositions(positions);
 
     const line = new Line2(geometry, material);
-
+    line.fog = true;
     return line;
   }
   drawLineAnimate(points, width) {
@@ -873,10 +948,10 @@ export default class ThreeMap {
       this.scene,
       this.camera
     );
-    // this.composer.addPass(this.outlinePass);
+    this.composer.addPass(this.outlinePass);
 
     const params = {
-      edgeStrength: 1.8,
+      edgeStrength: 4,
       edgeGlow: 0.0,
       edgeThickness: 2.5,
       pulsePeriod: 0,
@@ -887,13 +962,13 @@ export default class ThreeMap {
     this.outlinePass.edgeGlow = params.edgeGlow;
     this.outlinePass.edgeThickness = params.edgeThickness;
     this.outlinePass.pulsePeriod = params.pulsePeriod;
-    this.outlinePass.visibleEdgeColor.set("#ff0");
+    this.outlinePass.visibleEdgeColor.set("#ce7112");
     this.outlinePass.selectedObjects = this.selectedObjects;
 
     this.afterimagePass = new AfterimagePass(); // 物体运动时产生残影效果
     this.afterimagePass.uniforms["damp"].value = 0.98;
-    this.composer.addPass(this.afterimagePass);
-    this.composer.render();
+    // this.composer.addPass(this.afterimagePass);
+    // this.composer.render();
 
     const bloomParams = {
       bloomStrength: 4, // 光晕强度
@@ -927,6 +1002,15 @@ export default class ThreeMap {
       // height: window.innerHeight,
     });
     // this.composer.addPass(bokehPass);
+
+    // 聚焦效果
+    var focusShader = new ShaderPass(FocusShader);
+    focusShader.uniforms["screenWidth"].value = window.innerWidth;
+    focusShader.uniforms["screenHeight"].value = window.innerHeight;
+    focusShader.uniforms["sampleDistance"].value = 0.07;
+    // this.composer.addPass(focusShader);
+    // 镜面效果
+    // this.composer.addPass(new ShaderPass(MirrorShader));
   }
 
   /**
@@ -938,5 +1022,33 @@ export default class ThreeMap {
       // axesHelper.position.z = 1;
       this.scene.add(axesHelper);
     }
+  }
+
+  // 清除方法
+  dispose() {
+    // this.bloomPass.dispose();
+    // this.envMap.dispose();
+    // this.skymap.dispose();
+    // this.dracoLoader.dispose();
+    // this.spriteMaterial.dispose();
+    // this.sphereGeometry.dispose();
+    // this.meshBasicMaterial.dispose();
+    this.scene.dispose();
+    this.controls.dispose();
+
+    /*
+    const data = this.$data;
+      for (let i in data) {
+        if (data.hasOwnProperty(i)) {
+          if (data[i] && typeof data[i].dispose == "function") {
+            data[i].dispose();
+          }
+        }
+      }
+    */
+    // this.renderer.domElement 就是你的threejs的canvas Dom
+    let gl = this.renderer.domElement.getContext("webgl");
+
+    gl && gl.getExtension("WEBGL_lose_context").loseContext();
   }
 }
