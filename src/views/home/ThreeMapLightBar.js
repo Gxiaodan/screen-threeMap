@@ -110,11 +110,16 @@ export default class ThreeMapLightBar extends ThreeMap {
     // this.testMesh.rotateZ(Math.PI / 2);
     // this.testMesh.rotateZ(0.05);
     // this.testMesh.rotation.z = (this.colorIndex * Math.PI) / 5;
-    this.cylinder.scale.set(1 + 3 * ratio, 1 + 3 * ratio, 1 + 3 * ratio);
-    this.cylinder.material[0].opacity = 1 - ratio;
-    this.ballSphere.scale.set(1 + 3 * ratio, 1 + 3 * ratio, 1 + 3 * ratio);
-    this.ballSphere.material[0].opacity = 1 - ratio;
-    this.ballSphere.rotation.y -= Math.PI / 20;
+
+    // this.cylinder.scale.set(1 + 3 * ratio, 1 + 3 * ratio, 1 + 3 * ratio);
+    // this.cylinder.material[0].opacity = 1 - ratio;
+    // this.ballSphere.scale.set(1 + 3 * ratio, 1 + 3 * ratio, 1 + 3 * ratio);
+    // this.ballSphere.material[0].opacity -= ratio;
+    const delta = this.clock.getDelta();
+    this._uniforms["time"].value += delta * 0.5;
+    // console.log(clock);
+    // this._uniforms["time"].value = this.clock.elapsedTime;
+    // this.ballSphere.rotation.y -= Math.PI / 20;
   }, this.animateConfig.time);
 
   /**
@@ -302,7 +307,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       mesh.userData.max = maxValue;
       let layer1 = new THREE.Layers();
       layer1.set(1);
-      // mesh.layers = layer1;
+      mesh.layers = layer1;
       mesh.renderOrder = 99;
       mesh.renderDepth = 99;
 

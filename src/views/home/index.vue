@@ -42,7 +42,7 @@ import './index.less'
 import topImg from '@/assets/img/top.png'
 import barImg from '@/assets/img/barImg.png'
 import sideImg from '@/assets/img/side.png'
-import lightSideImg from '@/assets/img/barSide1.png'
+import lightSideImg from '@/assets/img/powerSide.jpg'
 import ThreeMapLightBar from './ThreeMapLightBar.js'
 import ThreeMap from './ThreeMap.js'
 import { util } from './util'
@@ -155,7 +155,7 @@ export default {
           opacity: 1
         },
         animateConfig: {
-          time: 5,
+          time: 30,
         }
       })
       

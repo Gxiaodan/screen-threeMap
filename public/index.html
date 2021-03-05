@@ -61,9 +61,20 @@
         void main() 
         {
             float a = pow( bias + scale * abs(dot(vNormal, vPositionNormal)), power );
-            //*(vec2(1.0,time))
-            vec4 mapColor=texture2D( textureMap, vUv*repeat);
-            gl_FragColor = vec4( glowColor*mapColor.rgb, a );
+            vec2 position = - 1.0 + 2.0 * vUv;
+            //*(vec2(1.0,time)) vUv += time * 0.05;   
+            float aa = atan( position.y, position.x );
+			float r = sqrt( dot( position, position ) ); 
+            vec2 uv;
+            uv.x = cos( aa ) / r;
+            uv.y = sin( aa ) / r;
+            uv /= 10.0;
+            uv += time * 0.05;    
+
+            //*vec4 mapColor=texture2D( textureMap, vUv*repeat);
+            vec4 mapColor = texture2D( textureMap, uv*repeat );
+            //*gl_FragColor = vec4( glowColor*time * mapColor.rgb, a *1.50 );
+            gl_FragColor = vec4( glowColor * r* mapColor.rgb, a);
         }
     </script>
 <noscript>

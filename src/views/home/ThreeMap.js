@@ -134,6 +134,7 @@ export default class ThreeMap {
   init() {
     this.mapCon = document.getElementById(this.canvasId);
     this.scene = new THREE.Scene();
+    this.clock = new THREE.Clock();
     // this.scene.background = new THREE.Color("#7d547c");
     // this.scene.fog = new THREE.Fog("#000", 480, 500);
     this.scene.position.set(this.scenePos.x, this.scenePos.y, this.scenePos.z);
@@ -448,35 +449,33 @@ export default class ThreeMap {
     // const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
     // this.scene.add(tubeMesh);
     // this.selectedObjects.push(tubeMesh);
-
     this._uniforms = {
       scale: { type: "f", value: -1.0 },
       bias: { type: "f", value: 1.0 },
-      power: { type: "f", value: 3.3 },
-      glowColor: { type: "c", value: new THREE.Color(0x00ffff) },
+      power: { type: "f", value: 1.3 },
+      glowColor: { type: "c", value: new THREE.Color(0xffff00) },
       textureMap: {
         value: undefined,
       },
       repeat: {
         type: "v2",
-        value: new THREE.Vector2(30.0, 15.0),
+        value: new THREE.Vector2(1.0, 1.0),
       },
       time: {
-        value: 0.0,
+        value: 1.0,
       },
     };
 
     let tx = new THREE.TextureLoader().load(this.modelConfig.lightModel.map);
-    // tx.wrapS = THREE.RepeatWrapping;
-    // tx.wrapT = THREE.RepeatWrapping;
+    // tx.wrapS = tx.wrapT = THREE.RepeatWrapping;
     this._uniforms.textureMap.value = tx;
-
     let materialFresnel = new THREE.ShaderMaterial({
       uniforms: this._uniforms,
       vertexShader: document.getElementById("vertexShader").textContent,
       fragmentShader: document.getElementById("fragmentShader").textContent,
-      //side: DoubleSide,
-      //blending:AdditiveBlending,
+      side: THREE.DoubleSide,
+      // blending: THREE.AdditiveBlending,
+      blending: THREE.NormalBlending,
       transparent: true,
       depthWrite: false,
     });
@@ -497,11 +496,11 @@ export default class ThreeMap {
     //   color: "#f00",
     // });
     let geometry1 = new THREE.TorusKnotBufferGeometry(10, 3, 100, 32);
-    var torusKnot = new THREE.Mesh(geometry1, materialFresnel);
+    var torusKnot = new THREE.Mesh(geometry1, [materialFresnel]);
     // this.scene.add(torusKnot);
 
     let option = {
-      R: 2,
+      R: 20,
       H: 3,
       A: 20,
       img: this.modelConfig.lightModel.map,
@@ -516,7 +515,7 @@ export default class ThreeMap {
 
     let sideTexture = new THREE.TextureLoader().load(option.img);
     sideTexture.wrapS = sideTexture.wrapT = THREE.RepeatWrapping;
-
+    sideTexture.repeat.set(2, 1);
     this.cylinder = new THREE.Mesh(geometry, [
       new THREE.MeshBasicMaterial({
         map: sideTexture,
@@ -537,7 +536,7 @@ export default class ThreeMap {
     ]);
     this.cylinder.position.set(
       0,
-      0,
+      4,
       option.H / 2 + this.modelConfig.height + 0.02
     );
     this.cylinder.rotation.x = Math.PI / 2;
@@ -548,9 +547,9 @@ export default class ThreeMap {
       50,
       50,
       0,
-      Math.PI * 2,
+      Math.PI,
       0,
-      Math.PI / 2
+      Math.PI
     );
     // this.ballSphere = new THREE.Mesh(barGeometry, [
     //   new THREE.MeshBasicMaterial({
@@ -564,7 +563,7 @@ export default class ThreeMap {
     // ]);
     this.ballSphere = new THREE.Mesh(barGeometry, [materialFresnel]);
     this.ballSphere.position.set(0, -10, this.modelConfig.height + 1);
-    this.ballSphere.rotation.x = Math.PI / 2;
+    // this.ballSphere.rotation.x = Math.PI / 2;
     // this.ballSphere.layers.set(1);
     // this.selectedObjects.push(this.ballSphere);
     this.scene.add(this.ballSphere);
@@ -823,11 +822,11 @@ export default class ThreeMap {
     }
     requestAnimationFrame(this.animate.bind(this));
 
-    // this.renderer.clear();
-    // this.camera.layers.set(1);
+    this.renderer.clear();
+    this.camera.layers.set(1);
     this.composer.render();
-    // this.renderer.clearDepth(); // 清除深度缓存
-    // this.camera.layers.set(0);
+    this.renderer.clearDepth(); // 清除深度缓存
+    this.camera.layers.set(0);
     this.renderer.render(this.scene, this.camera);
     this.labelRenderer.render(this.scene, this.camera);
     // required if controls.enableDamping or controls.autoRotate are set to true
@@ -984,7 +983,7 @@ export default class ThreeMap {
     bloomPass.threshold = bloomParams.bloomThreshold;
     bloomPass.strength = bloomParams.bloomStrength;
     bloomPass.radius = bloomParams.bloomRadius;
-    // this.composer.addPass(bloomPass);
+    this.composer.addPass(bloomPass);
 
     let effectFXAA = new ShaderPass(FXAAShader);
     effectFXAA.uniforms.resolution.value.set(
