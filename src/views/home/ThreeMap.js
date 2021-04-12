@@ -467,7 +467,7 @@ export default class ThreeMap {
     };
 
     let tx = new THREE.TextureLoader().load(this.modelConfig.lightModel.map);
-    // tx.wrapS = tx.wrapT = THREE.RepeatWrapping;
+    tx.wrapS = tx.wrapT = THREE.RepeatWrapping;
     this._uniforms.textureMap.value = tx;
     let materialFresnel = new THREE.ShaderMaterial({
       uniforms: this._uniforms,
