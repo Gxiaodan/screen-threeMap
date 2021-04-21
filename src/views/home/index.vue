@@ -39,8 +39,8 @@
 <script>
 import * as THREE from 'three'
 import './index.less'
-import topImg from '@/assets/img/top.png'
-import sideImg from '@/assets/img/side.png'
+import topImg from '@/assets/img/top11.png'
+import sideImg from '@/assets/img/side11.png'
 import ThreeMapLightBar from './ThreeMapLightBar.js'
 import ThreeMap from './ThreeMap.js'
 import { util } from './util'
@@ -102,7 +102,7 @@ export default {
       const map = new ThreeMapLightBar({ 
         mapData, 
         flyDatas: _this.flyDatas,
-        isControl: false,
+        isControl: true,
         labelDatas: _this.labelDatas,
         canvasId: "canvas_content",
         scenePos:{ x: -26.37, y: 5.39, z: -32.37 },

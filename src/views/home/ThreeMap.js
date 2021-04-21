@@ -128,7 +128,7 @@ export default class ThreeMap {
     // this.scene.background = new THREE.Color("#7d547c");
     // this.scene.fog = new THREE.Fog("#0f0", 480, 500);
     this.scene.position.set(this.scenePos.x, this.scenePos.y, this.scenePos.z);
-    this.scene.scale.set(1.19, 1.04, 1)
+    this.scene.scale.set(1.19, 1.04, 1);
     this.camera = new THREE.PerspectiveCamera(
       this.cameraConfig.fov,
       this.cameraConfig.aspect,
@@ -220,6 +220,8 @@ export default class ThreeMap {
 
   // 滚轮事件
   mousewheel(event) {
+    console.log(this.camera, "camera");
+    console.log(this.scene, "this.scene");
     const type = event.type;
     // console.log(type, "====================");
     event.preventDefault();
@@ -257,7 +259,7 @@ export default class ThreeMap {
     // 计算物体和射线的焦点
     this.intersects = this.raycaster.intersectObjects(this.meshes);
     if (this.intersects.length > 0) {
-      console.log(this.intersects, "======");
+      // console.log(this.intersects, "======");
       // this.labelRenderer.domElement.style.display = "block";
       this.clickFunction(
         event,
@@ -280,7 +282,7 @@ export default class ThreeMap {
    * @desc 设置区域颜色
    */
   clearColor(group) {
-    console.log(this.mapColors);
+    // console.log(this.mapColors);
     group.forEach((gs) => {
       gs.children.forEach((mesh) => {
         if (mesh.material instanceof Array) {
@@ -404,7 +406,7 @@ export default class ThreeMap {
       this.lineConfig.color,
       this.lineConfig.width
     );
-    lineGroup.position.z = this.modelConfig.height+0.06;
+    lineGroup.position.z = this.modelConfig.height + 0.06;
     this.scene.add(lineGroup);
     // const lineGroupBottom = lineGroup.clone();
     // lineGroupBottom.position.z = -0.01;
@@ -670,7 +672,7 @@ export default class ThreeMap {
       this.labelRenderer.domElement
     );
     this.controls.enabled = this.isControl;
-    if(this.isControl) {
+    if (this.isControl) {
       this.controls.enablePan = true; // 邮件拖拽
       this.controls.enableZoom = true; // 滚轮缩放
       this.controls.enableRotate = true; // 左键旋转
