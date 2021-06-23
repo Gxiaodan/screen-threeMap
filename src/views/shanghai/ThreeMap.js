@@ -367,7 +367,7 @@ export default class ThreeMap {
       linecap: "square", // 线两端的样式
       linejoin: "round", // 线连接节点的样式
       lights: false, // 材质是否受到光照的影响
-      opacity: this.lineConfig.opacity,
+      opacity: 1,
     });
     material.resolution.set(window.innerWidth, window.innerHeight);
     const geometry = new LineGeometry();
@@ -494,12 +494,12 @@ export default class ThreeMap {
     texture.repeat.set(0.01, 0.01);
     texture.offset.set(0.5, 0.4);
     texture.rotation = 0;
-    const material = new THREE.MeshPhongMaterial({
-      color: this.modelConfig.topModel.color,
-      // map: texture,
-      // transparent: true,
-      // side: THREE.DoubleSide,
-      // opacity: this.modelConfig.topModel.opacity,
+    const material = new THREE.MeshBasicMaterial({
+      // color: this.modelConfig.topModel.color,
+      map: texture,
+      transparent: true,
+      side: THREE.DoubleSide,
+      opacity: this.modelConfig.topModel.opacity,
     });
     let sideTexture = new THREE.TextureLoader().load(
       this.modelConfig.sideModel.map

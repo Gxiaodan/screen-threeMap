@@ -39,7 +39,7 @@
 <script>
 import * as THREE from 'three'
 import './index.less'
-import topImg from '@/assets/img/top.png'
+import topImg from '@/assets/img/bg.png'
 import barImg from '@/assets/img/barImg.png'
 import sideImg from '@/assets/img/side.png'
 import lightSideImg from '@/assets/img/powerSide.jpg'
@@ -136,8 +136,8 @@ export default {
         },
         lineConfig: {
           color: '#00fff5',
-          width: 1,
-          opacity: 1
+          width: 3,
+          opacity: 0.1
         },
         lightConfig: {
           point:{
@@ -164,7 +164,7 @@ export default {
         const type = e.type
         if (type == 'mousemove') {
           // map.setLabelPos(g, 'mousemove', p)
-          _this.provinceName = map.provinceName
+          _this.provinceName = this.map.provinceName
           // map.setAreaColor(g);
         } else if (type == 'mouseup') {
           // map.setAreaColor(g)

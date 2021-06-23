@@ -135,7 +135,9 @@ export default class ThreeMap {
     this.mapCon = document.getElementById(this.canvasId);
     this.scene = new THREE.Scene();
     this.clock = new THREE.Clock();
-    // this.scene.background = new THREE.Color("#7d547c");
+    this.scene.background = new THREE.TextureLoader().load(
+      this.modelConfig.topModel.map
+    );
     // this.scene.fog = new THREE.Fog("#000", 480, 500);
     this.scene.position.set(this.scenePos.x, this.scenePos.y, this.scenePos.z);
     this.scene.scale.set(1.19, 1.04, 1);
@@ -633,7 +635,7 @@ export default class ThreeMap {
       linecap: "square", // 线两端的样式
       linejoin: "round", // 线连接节点的样式
       lights: false, // 材质是否受到光照的影响
-      opacity: this.lineConfig.opacity,
+      opacity: 1,
     });
     material.resolution.set(window.innerWidth, window.innerHeight);
     const geometry = new LineGeometry();

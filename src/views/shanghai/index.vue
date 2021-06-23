@@ -10,9 +10,9 @@
 </template>
 <script>
 import * as THREE from 'three'
-import topImg from '@/assets/img/top0.jpg'
+import topImg from '@/assets/img/top11.png'
 import barImg from '@/assets/img/barImg.png'
-import sideImg from '@/assets/img/side.png'
+import sideImg from '@/assets/img/side11.png'
 import lightSideImg from '@/assets/img/powerSide.jpg'
 import ThreeMap from './ThreeMap.js'
 
@@ -82,7 +82,7 @@ export default {
         lineConfig: {
           color: '#00fff5',
           width: 1,
-          opacity: 1
+          opacity: 0.51
         },
         lightConfig: {
           point:{
