@@ -113,7 +113,7 @@ export default {
           far: 100000,
           pos: { x: 396, y: 12, z: 167 }
         },
-        helperConfig: { isShow: false, length: 30 },
+        helperConfig: { isShow: true, length: 30 },
         mirrorConfig: { isShow: false},
         borderLineConfig: { isShow: false},
         modelConfig: {

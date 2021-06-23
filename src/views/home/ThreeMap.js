@@ -148,6 +148,18 @@ export default class ThreeMap {
     this.setControl();
 
     this.animate();
+    const groundMaterial = new THREE.MeshBasicMaterial({
+      color: "#068efd",
+    });
+    let mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(150, 150),
+      groundMaterial
+    );
+    mesh.position.y = 0;
+    mesh.rotation.x = 0;
+    mesh.rotation.z = 0;
+    mesh.receiveShadow = true;
+    this.scene.add(mesh);
 
     // this.lineAnimate()
     this.mapCon.addEventListener("mouseup", this.mouseEvent.bind(this), false);
@@ -672,21 +684,22 @@ export default class ThreeMap {
       this.labelRenderer.domElement
     );
     this.controls.enabled = this.isControl;
-    if (this.isControl) {
-      this.controls.enablePan = true; // 邮件拖拽
-      this.controls.enableZoom = true; // 滚轮缩放
-      this.controls.enableRotate = true; // 左键旋转
-      this.controls.minZoom = 0.5; // 缩放范围
-      this.controls.maxZoom = 2.0;
-      // 上下旋转范围
-      this.controls.minPolarAngle = Math.PI * (90 / 360);
-      this.controls.maxPolarAngle = Math.PI * (1 - 230 / 360);
-      // this.controls.minPolarAngle = 0;
-      // this.controls.maxPolarAngle = Math.PI * (1 / 2);
-      // 左右旋转范围
-      this.controls.minAzimuthAngle = Math.PI * (70 / 180);
-      this.controls.maxAzimuthAngle = Math.PI * (120 / 180);
-    }
+    this.controls.target.set(-26.37, 5.39, -32.37);
+    // if (this.isControl) {
+    //   this.controls.enablePan = true; // 邮件拖拽
+    //   this.controls.enableZoom = true; // 滚轮缩放
+    //   this.controls.enableRotate = true; // 左键旋转
+    //   this.controls.minZoom = 0.5; // 缩放范围
+    //   this.controls.maxZoom = 2.0;
+    //   // 上下旋转范围
+    //   this.controls.minPolarAngle = Math.PI * (90 / 360);
+    //   this.controls.maxPolarAngle = Math.PI * (1 - 230 / 360);
+    //   // this.controls.minPolarAngle = 0;
+    //   // this.controls.maxPolarAngle = Math.PI * (1 / 2);
+    //   // 左右旋转范围
+    //   this.controls.minAzimuthAngle = Math.PI * (70 / 180);
+    //   this.controls.maxAzimuthAngle = Math.PI * (120 / 180);
+    // }
     this.controls.update();
   }
 
