@@ -849,6 +849,7 @@ export default class ThreeMap {
       this.labelRenderer.domElement
     );
     this.controls.enabled = this.isControl;
+    this.controls.target.set(this.scenePos.x, this.scenePos.y, this.scenePos.z);
     if (this.isControl) {
       this.controls.enablePan = true; // 邮件拖拽
       this.controls.enableZoom = true; // 滚轮缩放
