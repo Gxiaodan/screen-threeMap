@@ -92,6 +92,7 @@ export default class ThreeMap {
     this.mapData = set.mapData;
     this.labelDatas = set.labelDatas;
     this.canvasId = set.canvasId;
+    this.spritTest = null;
     this.scenePos = set.scenePos || { x: 0, y: 0, z: -8 };
     this.cameraConfig = set.cameraConfig || {
       fov: 10,
@@ -387,6 +388,188 @@ export default class ThreeMap {
     });
   }
 
+  /* 绘制圆角矩形 */
+  roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.draw;
+  }
+  /* 创建字体精灵 */
+  makeTextSprite(message, parameters) {
+    if (parameters === undefined) parameters = {};
+
+    var fontface = parameters.hasOwnProperty("fontface")
+      ? parameters["fontface"]
+      : "Arial";
+
+    /* 字体大小 */
+    var fontsize = parameters.hasOwnProperty("fontsize")
+      ? parameters["fontsize"]
+      : 18;
+
+    /* 边框厚度 */
+    var borderThickness = parameters.hasOwnProperty("borderThickness")
+      ? parameters["borderThickness"]
+      : 4;
+
+    /* 边框颜色 */
+    var borderColor = parameters.hasOwnProperty("borderColor")
+      ? parameters["borderColor"]
+      : { r: 0, g: 0, b: 0, a: 1.0 };
+
+    /* 背景颜色 */
+    var backgroundColor = parameters.hasOwnProperty("backgroundColor")
+      ? parameters["backgroundColor"]
+      : { r: 255, g: 255, b: 255, a: 1.0 };
+
+    /* 创建画布 */
+    var canvas = document.createElement("canvas");
+    var context = canvas.getContext("2d");
+
+    /* 字体加粗 */
+    context.font = "Bold " + fontsize + "px " + fontface;
+
+    /* 获取文字的大小数据，高度取决于文字的大小 */
+    var metrics = context.measureText(message);
+    var textWidth = metrics.width / 2;
+
+    /* 背景颜色 */
+    context.fillStyle =
+      "rgba(" +
+      backgroundColor.r +
+      "," +
+      backgroundColor.g +
+      "," +
+      backgroundColor.b +
+      "," +
+      backgroundColor.a +
+      ")";
+
+    /* 边框的颜色 */
+    context.strokeStyle =
+      "rgba(" +
+      borderColor.r +
+      "," +
+      borderColor.g +
+      "," +
+      borderColor.b +
+      "," +
+      borderColor.a +
+      ")";
+    context.lineWidth = borderThickness;
+
+    /* 绘制圆角矩形 */
+    this.roundRect(
+      context,
+      borderThickness / 2,
+      borderThickness / 2,
+      textWidth + borderThickness,
+      fontsize * 1.4 + borderThickness,
+      6
+    );
+    /* 字体颜色 */
+    context.fillStyle = "rgba(0, 0, 0, 1.0)";
+    context.fillText(message, borderThickness, fontsize + borderThickness);
+    /* 背景图 */
+    // context.drawImage('textures/planets/earth_atmos_4096.jpg',0,0,canvas.width,canvas.height);
+    // const textureLoader = new THREE.TextureLoader();
+    // let _context = context
+    // textureLoader.load( 'textures/planets/earth_atmos_4096.jpg', function ( tex ) {
+
+    //     _context.drawImage(tex,0,0,canvas.width,canvas.height);
+
+    // } );
+
+    /* 画布内容用于纹理贴图 */
+    var texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+
+    var spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+    var sprite = new THREE.Sprite(spriteMaterial);
+
+    console.log(sprite.spriteMaterial);
+
+    /* 缩放比例 */
+    sprite.scale.set(10, 5, 0);
+
+    return sprite;
+  }
+  showSprite() {
+    var sprite;
+    let _this = this;
+    this.makeTextPlaneMate2().then(function(m) {
+      sprite = new THREE.Sprite(m);
+      // sprite.position.set(145, 220, -135);
+      sprite.position.set(0, 0, 15);
+      sprite.scale.set(10, 5, 1);
+      console.log(sprite, "sprite============");
+      _this.spritTest = sprite;
+      sprite.name = "spritTest";
+      _this.scene.add(sprite.clone());
+    });
+  }
+  makeTextPlaneMate2() {
+    //绘制画布做为Sprite的材质
+    var canvasText = document.createElement("canvas");
+    canvasText.width = 300;
+    var ctx = canvasText.getContext("2d");
+    //添加背景图片，进行异步操作
+    let _this = this;
+    return new Promise((resolve, reject) => {
+      let img = new Image();
+      img.src = _this.modelConfig.topModel.map;
+      //图片加载之后的方法
+      img.onload = () => {
+        //将画布处理为透明
+        ctx.clearRect(200, 0, 300, 75);
+        //绘画图片
+        ctx.drawImage(img, 200, 0, 300, 75);
+        resolve(_this.makeText(ctx, canvasText));
+      };
+      //图片加载失败的方法
+      img.onerror = (e) => {
+        reject(e);
+      };
+    });
+  }
+  makeText(ctx, canvas) {
+    //画边框
+    ctx.strokeStyle = "#000000";
+    ctx.strokeRect(200, 0, 300, 75);
+    //画线段
+    ctx.beginPath();
+    // ctx.moveTo(0, 75);
+    // ctx.lineTo(20, 95);
+    // ctx.lineTo(95, 95);
+    // ctx.lineTo(150, 150);
+    ctx.moveTo(0, 500);
+    ctx.lineTo(100, 37);
+    ctx.lineTo(200, 37);
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 20;
+    ctx.stroke();
+    //文字
+    const x = 200;
+    const y = 25;
+    ctx.font = "30px Arial";
+    ctx.fillText("这是一个标签展示文本", x, y);
+
+    let texture = new THREE.CanvasTexture(canvas);
+    let sprite = new THREE.SpriteMaterial({ map: texture });
+    return sprite;
+  }
+
   /**
    * @desc 绘制地图
    */
@@ -574,17 +757,42 @@ export default class ThreeMap {
     var textured = new THREE.TextureLoader().load(
       this.modelConfig.lightModel.map
     );
+    var canvas = document.createElement("canvas");
+    var context = canvas.getContext("2d");
     var spriteMaterial = new THREE.SpriteMaterial({
-      // color: 0xffffff,
+      // color: "#f00",
       map: textured,
     });
+    // var spriteMaterial = new THREE.SpriteCanvasMaterial({
+    //   // color: 0xffffff,
+    //   map: textured,
+    //   program: function(context) {
+    //     context.beginPath();
+    //     context.font = "bold 100px Arial";
+    //     context.fillStyle = "#f00";
+    //     context.transform(-1, 0, 0, 1, 0, 0);
+    //     context.rotate(Math.PI);
+    //     context.fillText("aaa", 0, 0);
+    //   },
+    // });
     var sprite = new THREE.Sprite(spriteMaterial);
     sprite.position.set(0, 0, 20);
     // console.log(sprite);
     sprite.scale.x = 10;
     sprite.scale.y = 5;
 
-    this.scene.add(sprite);
+    // this.scene.add(sprite);
+
+    var spriteOrigin = this.makeTextSprite(" vector3(0, 0, 0) ", {
+      fontsize: 20,
+      borderColor: { r: 255, g: 0, b: 0, a: 0.4 } /* 边框黑色 */,
+      backgroundColor: { r: 255, g: 255, b: 255, a: 0.9 } /* 背景颜色 */,
+    });
+    spriteOrigin.center = new THREE.Vector2(0, 0);
+    this.scene.add(spriteOrigin);
+    spriteOrigin.position.set(0, -5, 5);
+
+    this.showSprite();
   }
 
   /*
@@ -829,6 +1037,13 @@ export default class ThreeMap {
     this.composer.render();
     this.renderer.clearDepth(); // 清除深度缓存
     this.camera.layers.set(0);
+    // let test = this.scene.children.filter(
+    //   (item) => item.name == "spritTest"
+    // )?.[0];
+    // if (test && test.material.map.image.width > 10) {
+    //   // test.material.map.image.width -= 0.01;
+    //   test.material.map.image.width = 100;
+    // }
     this.renderer.render(this.scene, this.camera);
     this.labelRenderer.render(this.scene, this.camera);
     // required if controls.enableDamping or controls.autoRotate are set to true

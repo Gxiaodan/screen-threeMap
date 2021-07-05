@@ -39,7 +39,7 @@
 <script>
 import * as THREE from 'three'
 import './index.less'
-import topImg from '@/assets/img/bg.png'
+import topImg from '@/assets/img/top3.png'
 import barImg from '@/assets/img/barImg.png'
 import sideImg from '@/assets/img/side.png'
 import lightSideImg from '@/assets/img/powerSide.jpg'
