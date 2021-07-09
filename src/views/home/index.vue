@@ -80,13 +80,14 @@ export default {
         { name: '上海市', value: 73 }
       ],
       flyDatas: [
-        { source: { name: '北京' }, curve: [{x: -10, y: 8, z: 15}, {x: -10, y: -5, z: 25}], value: 150 },
-        { source: { name: '西安' }, curve: [{x: -3, y: 0, z: 15}, {x: -10, y: -8, z: 25}], value: 60 },
-        { source: { name: '上海' }, curve: [{x: 2, y: 16, z: 25}, {x: -10, y: -3, z: 25}], value: 70 },
-        { source: { name: '徐州' }, curve: [{x: 2, y: 5, z: 22}, {x: -10, y: -6, z: 25}], value: 70 },
-        { source: { name: '杭州' }, curve: [{x: 2, y: 10, z: 25}, {x: -10, y: -4, z: 25}], value: 70 },
-        { source: { name: '遵义' }, curve: [{x: 2, y: 6, z: 18}, {x: -10, y: -7, z: 25}], value: 70 },
-        { source: { name: '和田' }, curve: [{x: -25, y: -40, z: 10}, {x: -10, y: -10, z: 25}], value: 200}
+        { source: { name: '北京' }, target: {name: '西安' }, curve: [{x: -10, y: 8, z: 15}, {x: -10, y: -5, z: 25}], value: 150 },
+        // { source: { name: '西安' }, curve: [{x: -3, y: 0, z: 15}, {x: -10, y: -8, z: 25}], value: 60 },
+        // { source: { name: '西安' }, target: {name: '西安' }, curve: [{x: -3, y: 0, z: 15}, {x: -10, y: -8, z: 25}], value: 60 },
+        { source: { name: '上海' }, target: {name: '西安' }, curve: [{x: 2, y: 16, z: 25}, {x: -10, y: -3, z: 25}], value: 70 },
+        { source: { name: '徐州' }, target: {name: '西安' },  curve: [{x: 2, y: 5, z: 22}, {x: -10, y: -6, z: 25}], value: 70 },
+        { source: { name: '杭州' }, target: {name: '西安' },  curve: [{x: 2, y: 10, z: 25}, {x: -10, y: -4, z: 25}], value: 70 },
+        { source: { name: '遵义' }, target: {name: '西安' },  curve: [{x: 2, y: 6, z: 18}, {x: -10, y: -7, z: 25}], value: 70 },
+        { source: { name: '和田' }, target: {name: '西安' },  curve: [{x: -25, y: -40, z: 10}, {x: -10, y: -10, z: 25}], value: 200}
       ]
     }
   },
@@ -133,13 +134,13 @@ export default {
           }
         },
         flyLineConfig: {
-          colors: ["rgb(0,255,245)"],
-          // colors: ["rgb(245,127,127)", "rgb(255,0,0)", "rgb(245,127,127)"],
+          // colors: ["rgb(0,255,245)"],
+          colors: ["rgb(0,255,245)","rgb(255,154,0)"],
           pointLength: 90,
-          moveLength: 9,
-          width: 1,
-          lightLineWidth: 3,
-          opacity: 0.3
+          moveLength: 27,
+          width: 3,
+          lightLineWidth: 5,
+          opacity: 1
         },
         animateConfig: {
           time: 30,

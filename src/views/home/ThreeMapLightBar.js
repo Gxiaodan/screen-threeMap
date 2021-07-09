@@ -8,6 +8,7 @@ import { Reflector } from "three/examples/jsm/objects/Reflector.js";
 import { Line2 } from "three/examples/jsm/lines/Line2";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
+import TWEEN from "@tweenjs/tween.js";
 
 import { util } from "./util";
 
@@ -32,7 +33,7 @@ export default class ThreeMapLightBar extends ThreeMap {
       lightLineWidth: 2,
       opacity: 1,
     };
-    this.flyDatas = set.flyDatas
+    this.flyDatas = set.flyDatas;
     this.borderLineConfig = set.borderLineConfig || { isShow: false };
     this.dataKeys = {};
     this.setDataKeys();
@@ -50,6 +51,34 @@ export default class ThreeMapLightBar extends ThreeMap {
       const borderData = JSON.parse(data);
       _this.drawBorderMesh(borderData);
     });
+    var startPoint = {
+      x: 0,
+      y: 0,
+      z: 0,
+    };
+
+    var endPoint = {
+      x: -80,
+      y: 0,
+      z: 50,
+    };
+
+    var heightLimit = 20;
+
+    var flyTime = 8000;
+
+    var lineStyle = {
+      color: 0xcc0000,
+      linewidth: 2,
+    };
+    const aCurve = this.createFlyLine(
+      startPoint,
+      endPoint,
+      heightLimit,
+      flyTime,
+      lineStyle
+    );
+    // this.scene.add(aCurve);
   }
 
   // 设置键值
@@ -76,8 +105,10 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.flyGroup1 &&
       this.flyGroup1.children.forEach((d) => {
         let moveLength = this.flyLineConfig.moveLength;
-        let moveIndex = (this.colorIndex * 3) % d.userData.positions.length
-        d.geometry.setPositions(d.userData.positions.slice(moveIndex,moveIndex + moveLength));
+        let moveIndex = (this.colorIndex * 3) % d.userData.positions.length;
+        d.geometry.setPositions(
+          d.userData.positions.slice(moveIndex, moveIndex + moveLength)
+        );
         // let colorList = [];
         // let value = d.userData.value
         // let max = d.userData.max
@@ -168,7 +199,6 @@ export default class ThreeMapLightBar extends ThreeMap {
     return [plane, plane2];
     // return [plane];
   }
-
   /**
    * @desc 绘制光柱
    */
@@ -246,14 +276,14 @@ export default class ThreeMapLightBar extends ThreeMap {
    */
   drawFlyLine() {
     const group = new THREE.Group();
-    const group1 = group.clone()
+    const group1 = group.clone();
     group.name = "飞线";
     const maxValue = Math.max(...this.flyDatas.map((item) => item.value));
     this.flyDatas.forEach((d) => {
       // 源和目标省份的经纬度
       const slnglat = this.dataKeys[d.source.name];
       const value = d.value;
-      const z = 10;
+      const z = 30;
       const [x1, y1, z1] = this.lnglatToMector(slnglat);
       let x2, y2, z2;
       let curve;
@@ -275,52 +305,81 @@ export default class ThreeMapLightBar extends ThreeMap {
       const geometry = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
       // geometry.vertices = points;
       const positions = [];
-      // const colorList = [];
-      points.forEach((p) => {
+      const positions1 = [];
+      let colors = util.getRgb(
+        this.flyLineConfig.colors,
+        this.flyLineConfig.pointLength
+      );
+      const material = new LineMaterial({
+        // dashed: false,
+        // color: 0xffffff,
+        // vertexColors: true, // 是否使用顶点着色 THREE.NoColors THREE.VertexColors THREE.FaceColors
+        transparent: true,
+        linewidth: this.flyLineConfig.width,
+        // linecap: "butt", // 线两端的样式
+        linejoin: "round", // 线连接节点的样式
+        opacity: this.flyLineConfig.opacity,
+        lights: false, // 材质是否受到光照的影响
+        vertexColors: THREE.VertexColors,
+        // dashed: true,
+      });
+      points.forEach((p, i) => {
+        if (i < this.flyLineConfig.lightLineWidth) {
+          positions1.push(p.x, p.y, p.z);
+        }
         positions.push(p.x, p.y, p.z);
         //  let color = new THREE.Color("#f00");
         // let color = new THREE.Color(0xffffff);
         // color.setHSL(p.x / 100 + 0.1, (  p.y * 20 ) / 300, 0.7);
         // colorList.push( color.r, color.g, color.b );
+        // const t = i / l;
+        // color.setHSL(t, 1.0, 0.5);
+        // geometry.setPositions([p.x, p.y, p.z]);
+        // const color = colors[i] ? colors[i] : colors[0];
+        // geometry.setColors([color.r, color.g, color.b]);
+        // group.add(new Line2(geometry, material));
+        // colors.push(color.r, color.g, color.b);
       });
       geometry.setPositions(positions);
       geometry.setColors(
         util.getRgb(this.flyLineConfig.colors, this.flyLineConfig.pointLength)
       );
+      // geometry.setColors(colors);
+      // geometry.colors = colors;
 
-      const material = new LineMaterial({
-        dashed: false,
-        // color: 0xffffff,
-        vertexColors: true, // 是否使用顶点着色 THREE.NoColors THREE.VertexColors THREE.FaceColors
-        transparent: true,
-        linewidth: this.flyLineConfig.width,
-        linecap: "butt", // 线两端的样式
-        // linejoin: "round", // 线连接节点的样式
-        opacity: this.flyLineConfig.opacity,
-        lights: false, // 材质是否受到光照的影响
-        // clipShadows: true,
-        // shadowSide: THREE.DoubleSide
-      });
       material.resolution.set(window.innerWidth, window.innerHeight);
       const mesh = new Line2(geometry, material);
       mesh.userData.value = value;
       mesh.userData.max = maxValue;
-      
+
       const geometry1 = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
-      // geometry1.setPositions(positions.splice(0,30));
+      // geometry1.setPositions(positions.splice(0, 30));
+      // geometry1.setPositions(positions1);
       geometry1.setColors(
-        util.getRgb(['rgb(255, 255, 255)'], this.flyLineConfig.moveLength)
+        util.getRgb(["rgb(255, 255, 255)"], this.flyLineConfig.pointLength)
       );
-      let material1 = material.clone()
+      let material1 = material.clone();
+      // let material1 = new THREE.LineBasicMaterial({ color: 0xffffff });
       material1.opacity = 1;
-      material1.linewidth = this.flyLineConfig.lightLineWidth
-      const mesh1 = new Line2(geometry1, material1);
+      material1.linewidth = this.flyLineConfig.lightLineWidth;
+      const mesh1 = new THREE.LineSegments(geometry1, material1);
+      // mesh1.position.x = Math.random() * 400 - 200;
+      // mesh1.position.y = Math.random() * 400 - 200;
+      // mesh1.position.z = Math.random() * 400 - 200;
+
+      // mesh1.rotation.x = Math.random() * 2 * Math.PI;
+      // mesh1.rotation.y = Math.random() * 2 * Math.PI;
+      // mesh1.rotation.z = Math.random() * 2 * Math.PI;
+
+      mesh1.scale.x = Math.random() + 1.5;
+      mesh1.scale.y = Math.random() + 1.5;
+      mesh1.scale.z = Math.random() + 1.5;
       mesh1.userData.positions = positions;
       group.add(mesh);
       group1.add(mesh1);
     });
     this.flyGroup = group;
-    this.flyGroup1 = group1
+    this.flyGroup1 = group1;
     // this.flyGroup.position.z = this.modelConfig.height + 0.1;
     this.flyGroup.position.z = 0.1;
     this.flyGroup1.position.z = 0.05;
@@ -355,5 +414,51 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.scene.add(meshGroup);
     if (this.mirrorConfig.isShow) this.scene.add(mirrorGroup);
     if (this.borderLineConfig.isShow) this.scene.add(lineGroup);
+  }
+
+  createFlyLine(startPoint, endPoint, heightLimit, flyTime, lineStyle) {
+    var middleCurvePositionX = (startPoint.x + endPoint.x) / 2;
+    var middleCurvePositionY = heightLimit;
+    var middleCurvePositionZ = (startPoint.z + endPoint.z) / 2;
+
+    var curveData = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(startPoint.x, startPoint.y, startPoint.z),
+      new THREE.Vector3(
+        middleCurvePositionX,
+        middleCurvePositionY,
+        middleCurvePositionZ
+      ),
+      new THREE.Vector3(endPoint.x, endPoint.y, endPoint.z),
+    ]);
+    var curveModelData = curveData.getPoints(50);
+
+    var curveGeometry = new THREE.Geometry();
+    curveGeometry.vertices = curveModelData.slice(0, 1);
+    var curveMaterial = new THREE.LineBasicMaterial({
+      color: lineStyle.color,
+      linewidth: lineStyle.linewidth,
+    });
+    var curve = new THREE.Line(curveGeometry, curveMaterial);
+
+    var tween = new TWEEN.Tween({ endPointIndex: 1 }).to(
+      { endPointIndex: 50 },
+      flyTime
+    );
+
+    tween.onUpdate(tweenHandler);
+
+    tween.start();
+
+    return curve;
+
+    function tweenHandler() {
+      var endPointIndex = Math.ceil(this.endPointIndex);
+
+      var curvePartialData = new THREE.CatmullRomCurve3(
+        curveModelData.slice(0, endPointIndex)
+      );
+      curve.geometry.vertices = curvePartialData.getPoints(50);
+      curve.geometry.verticesNeedUpdate = true;
+    }
   }
 }

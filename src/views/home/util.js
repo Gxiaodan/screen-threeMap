@@ -73,16 +73,17 @@ class Utils {
     const colors = [];
     for (let i = 0; i < n; i++) {
       let r, g, b;
-      if (i < n / 2) {
-        r = rgb1[0] + ((rgb2[0] - rgb1[0]) / n) * i;
-        g = rgb1[1] + ((rgb2[1] - rgb1[1]) / n) * i;
-        b = rgb1[2] + ((rgb2[2] - rgb1[2]) / n) * i;
-      } else {
-        r = rgb2[0] + ((rgb3[0] - rgb2[0]) / n) * i;
-        g = rgb2[1] + ((rgb3[1] - rgb2[1]) / n) * i;
-        b = rgb2[2] + ((rgb3[2] - rgb2[2]) / n) * i;
-      }
+      // if (i < n / 2) {
+      r = rgb1[0] + ((rgb2[0] - rgb1[0]) / n) * i;
+      g = rgb1[1] + ((rgb2[1] - rgb1[1]) / n) * i;
+      b = rgb1[2] + ((rgb2[2] - rgb1[2]) / n) * i;
+      // } else {
+      //   r = rgb2[0] + ((rgb3[0] - rgb2[0]) / n) * i;
+      //   g = rgb2[1] + ((rgb3[1] - rgb2[1]) / n) * i;
+      //   b = rgb2[2] + ((rgb3[2] - rgb2[2]) / n) * i;
+      // }
       colors.push(r / 255, g / 255, b / 255);
+      // colors.push({ r: r / 255, g: g / 255, b: b / 255 });
     }
 
     return colors;
