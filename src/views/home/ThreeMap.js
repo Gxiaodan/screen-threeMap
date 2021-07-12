@@ -441,25 +441,25 @@ export default class ThreeMap {
     // this.scene.add(group1);
 
     //===============创建管道练习
-    // const tubePoints = [
-    //   new THREE.Vector3(-12.55, 10.47, 3.1),
-    //   new THREE.Vector3(-7.61, 5.267, 10),
-    //   new THREE.Vector3(-2.669, 0.061, 3.1),
-    // ];
+    const tubePoints = [
+      new THREE.Vector3(-12.55, 10.47, 3.1),
+      new THREE.Vector3(-7.61, 5.267, 10),
+      new THREE.Vector3(-2.669, 0.061, 3.1),
+    ];
 
     // // CatmullRomCurve3创建一条平滑的三维样条曲线
-    // const curve = new THREE.CatmullRomCurve3(tubePoints); // 曲线路径
-    // const tubeMaterial = new THREE.MeshBasicMaterial({
-    //   // map: this.texture,
-    //   color: "#ff0",
-    //   shadowSide: THREE.BackSide,
-    //   transparent: true,
-    //   polygonOffset: true,
-    // });
+    const curve = new THREE.CatmullRomCurve3(tubePoints); // 曲线路径
+    const tubeMaterial = new THREE.MeshBasicMaterial({
+      // map: this.texture,
+      color: "#f00",
+      shadowSide: THREE.BackSide,
+      transparent: true,
+      polygonOffset: true,
+    });
     // // 创建管道
-    // const tubeGeometry = new THREE.TubeGeometry(curve, 80, 0.08, 50, false); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
+    const tubeGeometry = new THREE.TubeGeometry(curve, 80, 0.08, 50, false); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
 
-    // const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
+    const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
     // this.scene.add(tubeMesh);
     // this.selectedObjects.push(tubeMesh);
   }

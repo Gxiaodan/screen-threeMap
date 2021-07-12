@@ -237,6 +237,7 @@ export default class ThreeMapLightBar extends ThreeMap {
   drawFlyLine() {
     const group = new THREE.Group();
     const group1 = group.clone();
+    const group2 = group.clone();
     group.name = "飞线";
     const maxValue = Math.max(...this.flyDatas.map((item) => item.value));
     this.flyDatas.forEach((d, index) => {
@@ -262,12 +263,16 @@ export default class ThreeMapLightBar extends ThreeMap {
           new THREE.Vector3(d.curve[1].x, d.curve[1].y, d.curve[1].z)
         );
       const points = curve.getPoints(this.flyLineConfig.pointLength - 1);
+      const points1 = [];
       const geometry = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
       // geometry.vertices = points;
       const positions = [];
       // const colorList = [];
-      points.forEach((p) => {
+      points.forEach((p, i) => {
         positions.push(p.x, p.y, p.z);
+        if (i % 5 == 0) {
+          points1.push(p.x, p.y, p.z);
+        }
         //  let color = new THREE.Color("#f00");
         // let color = new THREE.Color(0xffffff);
         // color.setHSL(p.x / 100 + 0.1, (  p.y * 20 ) / 300, 0.7);
@@ -299,38 +304,85 @@ export default class ThreeMapLightBar extends ThreeMap {
       // 管道实现外边缘效果
       const tubeCurve = new THREE.CatmullRomCurve3(points); // 曲线路径
       const tubeMaterial = new THREE.MeshBasicMaterial({
-        color: "#ff0",
+        color: "#f5e669",
         transparent: true,
+        opacity: 0.3,
         polygonOffset: true,
-        side: THREE.DoubleSide,
+        // side: THREE.DoubleSide,
       });
 
       // 创建管道
-      const tubeGeometry = new THREE.TubeGeometry(
-        tubeCurve,
-        80,
-        0.1,
-        50,
-        false
-      ); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
+      const tubeGeometry = new THREE.TubeGeometry(tubeCurve, 80, 1, 50, false); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
 
       const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
       tubeMesh.name = "飞线" + index;
       tubeMesh.userData = { index: index };
-      group.add(tubeMesh);
+      // group.add(tubeMesh);
+      var material111 = new THREE.MeshLambertMaterial({
+        // color: 0x0000ff, //三角面颜色
+        map: new THREE.TextureLoader().load(this.modelConfig.barModel.map),
+      }); //材质对象
+      var mesh111 = new THREE.Mesh(tubeGeometry, material111); //网格模型对象Mesh
+      // group1.add(mesh111);
+      // var geometry112 = new THREE.TubeGeometry(path, 100, 1, 25, false);
+      var material112 = new THREE.MeshBasicMaterial({
+        // color: 0x0000ff, //三角面颜色
+        map: new THREE.TextureLoader().load(this.modelConfig.barModel.map),
+      }); //材质对象
+      var mesh112 = new THREE.Mesh(tubeGeometry, material112); //网格模型对象Mesh
+      // this.scene.add(mesh112);
 
       const geometry1 = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
-      // geometry1.setPositions(positions.splice(0,30));
       geometry1.setColors(
-        util.getRgb(["rgb(255, 255, 255)"], this.flyLineConfig.moveLength)
+        util.getRgb(
+          ["rgb(255, 255, 255)", "rgb(255, 0, 0)", "rgb(0,255, 0)"],
+          this.flyLineConfig.moveLength
+        )
       );
+      geometry1.setPositions(positions.splice(0, 30));
       let material1 = material.clone();
       material1.opacity = 1;
       material1.linewidth = this.flyLineConfig.lightLineWidth;
       const mesh1 = new Line2(geometry1, material1);
       mesh1.userData.positions = positions;
-      // group.add(mesh);
+      group.add(mesh);
       group1.add(mesh1);
+
+      // 虚线练习
+      const lineGeometry = new THREE.BufferGeometry();
+      const points01 = [];
+
+      const point = new THREE.Vector3();
+      const direction = new THREE.Vector3();
+
+      for (let i = 0; i < 6; i++) {
+        direction.x += Math.random() - 0.5;
+        direction.y += Math.random() - 0.5;
+        direction.z += Math.random() - 0.5;
+        // direction.normalize().multiplyScalar(10);
+        direction.normalize().multiplyScalar(3);
+
+        point.add(direction);
+        points01.push(point.x, point.y, point.z);
+      }
+
+      lineGeometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(points01, 3)
+      );
+      let object;
+      const lineMaterial = new THREE.LineBasicMaterial({
+        // color: Math.random() * 0xffffff,
+        color: "#ff0",
+      });
+      object = new THREE.LineSegments(lineGeometry, lineMaterial);
+      // object.position.x = Math.random() * 400 - 200;
+      // object.position.y = Math.random() * 400 - 200;
+      // object.position.z = Math.random() * 400 - 200;
+      // object.rotateX = Math.random() + 1.5;
+      // object.rotateY = Math.random() + 1.5;
+      // object.rotateZ = Math.random() + 1.5;
+      // group2.add(object);
     });
     this.flyGroup = group;
     this.flyGroup1 = group1;
@@ -339,9 +391,67 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.flyGroup1.position.z = 0.05;
     this.scene.add(this.flyGroup);
     this.scene.add(this.flyGroup1);
-    this.selectedObjects.push(this.flyGroup);
-    this.outlinePass.selectedObjects = this.selectedObjects;
-    this.composer.render();
+    // this.scene.add(group2);
+    // this.selectedObjects.push(this.sflyGroup);
+    // this.outlinePass.selectedObjects = this.selectedObjects;
+    // this.composer.render();
+
+    var geometry = new THREE.BoxGeometry(20, 20, 20); //创建一个立方体几何对象Geometry
+    // 线条渲染模式
+    var material = new THREE.LineBasicMaterial({
+      color: 0xff0000, //线条颜色
+    }); //材质对象
+    // 创建线模型对象   构造函数：Line、LineLoop、LineSegments
+    var line = new THREE.Line(geometry, material); //线条模型对象
+    // this.scene.add(line);
+
+    var geometry10 = new THREE.BoxGeometry(20, 20, 20);
+    // 三角形面渲染模式
+    var material10 = new THREE.MeshLambertMaterial({
+      color: 0x0000ff, //三角面颜色
+    }); //材质对象
+    var mesh1 = new THREE.Mesh(geometry10, material10); //网格模型对象Mesh
+    // this.scene.add(mesh1);
+
+    //创建管道成型的路径(3D样条曲线)
+    var path = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-10, -50, -50),
+      new THREE.Vector3(10, 0, 0),
+      new THREE.Vector3(8, 50, 50),
+      new THREE.Vector3(-5, 0, 100),
+    ]);
+    // path:路径   40：沿着轨迹细分数  2：管道半径   25：管道截面圆细分数
+    // var geometry111 = new THREE.TubeGeometry(path, 40, 2, 25);
+    // var material111 = new THREE.MeshLambertMaterial({
+    //   // color: 0x0000ff, //三角面颜色
+    //   map: new THREE.TextureLoader().load(this.modelConfig.barModel.map),
+    // }); //材质对象
+    // var mesh111 = new THREE.Mesh(geometry111, material111); //网格模型对象Mesh
+    // this.scene.add(mesh111);
+
+    // 创建多段线条的顶点数据
+    var p1 = new THREE.Vector3(-85.35, -35.36);
+    var p2 = new THREE.Vector3(-50, 0, 0);
+    var p3 = new THREE.Vector3(0, 50, 0);
+    var p4 = new THREE.Vector3(50, 0, 0);
+    var p5 = new THREE.Vector3(85.35, -35.36);
+    // 创建线条一：直线
+    let line1 = new THREE.LineCurve3(p1, p2);
+    // 重建线条2：三维样条曲线
+    var curve = new THREE.CatmullRomCurve3([p2, p3, p4]);
+    // 创建线条3：直线
+    let line2 = new THREE.LineCurve3(p4, p5);
+    var CurvePath = new THREE.CurvePath(); // 创建CurvePath对象
+    CurvePath.curves.push(line1, curve, line2); // 插入多段线条
+    //通过多段曲线路径创建生成管道
+    //通过多段曲线路径创建生成管道，CCurvePath：管道路径
+    var geometry112 = new THREE.TubeGeometry(path, 100, 1, 25, false);
+    var material112 = new THREE.MeshBasicMaterial({
+      // color: 0x0000ff, //三角面颜色
+      map: new THREE.TextureLoader().load(this.modelConfig.barModel.map),
+    }); //材质对象
+    var mesh112 = new THREE.Mesh(geometry112, material112); //网格模型对象Mesh
+    // this.scene.add(mesh112);
   }
 
   drawBorderMesh(borderData) {
