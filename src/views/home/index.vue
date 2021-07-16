@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <!-- <video class="bgvid" id="bgvid" autoplay muted loop>
+    <video class="bgvid" id="bgvid" autoplay muted loop>
       <source src="@/assets/img/bg.webm" type="video/webm" />
-    </video> -->
+    </video>
     <div class="main-con">
       <div class="wheel-con">
         <div
@@ -57,7 +57,8 @@
 import * as THREE from "three";
 import "./index.less";
 import topImg from "@/assets/img/top.png";
-import barImg from "@/assets/img/label.png";
+import barImg from "@/assets/img/flyLine1.png";
+// import barImg from "@/assets/img/label.png";
 import sideImg from "@/assets/img/side.png";
 import ThreeMapLightBar from "./ThreeMapLightBar.js";
 import ThreeMap from "./ThreeMap.js";
@@ -176,6 +177,14 @@ export default {
       //   { source: { name: '遵义' }, curve: [{x: 2, y: 6, z: 18}, {x: -10, y: -7, z: 25}], value: 70 },
       //   { source: { name: '和田' }, curve: [{x: -25, y: -40, z: 10}, {x: -10, y: -10, z: 25}], value: 200}
       // ],
+      // flyDatas: [
+      //   { target: { name: "北京" }, source: { name: "西安" }, value: 150 },
+      //   { target: { name: "上海" }, source: { name: "西安" }, value: 70 },
+      //   { target: { name: "徐州" }, source: { name: "西安" }, value: 70 },
+      //   { target: { name: "杭州" }, source: { name: "西安" }, value: 70 },
+      //   { target: { name: "遵义" }, source: { name: "西安" }, value: 70 },
+      //   { target: { name: "和田" }, source: { name: "西安" }, value: 200 },
+      // ],
       flyDatas: [
         { source: { name: "北京" }, target: { name: "西安" }, value: 150 },
         { source: { name: "上海" }, target: { name: "西安" }, value: 70 },
@@ -216,7 +225,7 @@ export default {
           topModel: { opacity: 0.5, map: topImg },
           sideModel: { opacity: 1, map: sideImg },
           height: 3,
-          barModel: { map: barImg }
+          barModel: { map: barImg },
         },
         lineConfig: {
           color: "#00fff5",
@@ -230,16 +239,17 @@ export default {
           },
         },
         flyLineConfig: {
-          // colors: ["rgb(255,255,0)"],
-          colors: ["rgb(241,241,122)", "rgb(241,241,122)", "rgb(255,255,0)"],
+          colors: ["rgb(255,0,0)"],
+          // colors: ["rgb(6,142,253)", "rgb(255,0,0)", "rgb(6,142,253)"],
+          // colors: ["rgb(0,0,0)", "rgb(255,0,0)", "rgb(0,0,0)"],
           pointLength: 90,
-          moveLength: 60,
-          width: 1,
+          moveLength: 20,
+          width: 3,
           lightLineWidth: 1,
-          opacity: 1,
+          opacity: 0.2,
         },
         animateConfig: {
-          time: 1,
+          time: 100,
         },
       });
 
@@ -259,10 +269,10 @@ export default {
       // map.mapFixedLabel();
 
       // 绘制光柱
-      map.drawLightBar();
+      // map.drawLightBar();
 
       // 绘制线条
-      map.drawFlyLine()
+      map.drawFlyLine();
     });
     setInterval(() => {
       this.curIndex = (this.curIndex + 1) % this.wheelData.length;

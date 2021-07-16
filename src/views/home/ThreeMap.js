@@ -430,12 +430,12 @@ export default class ThreeMap {
       this.lineConfig.width
     );
     lineGroup.position.z = this.modelConfig.height + 0.06;
-    this.scene.add(lineGroup);
+    // this.scene.add(lineGroup);
     // const lineGroupBottom = lineGroup.clone();
     // lineGroupBottom.position.z = -0.01;
     // this.scene.add(lineGroupBottom);
     // this.group.position.z = 2;
-    this.scene.add(this.group);
+    // this.scene.add(this.group);
     // var group1 = this.group.clone(); //克隆网格模型
     // group1.position.z = 0;
     // this.scene.add(group1);
@@ -462,6 +462,20 @@ export default class ThreeMap {
     const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
     // this.scene.add(tubeMesh);
     // this.selectedObjects.push(tubeMesh);
+    const geometryPlant = new THREE.PlaneGeometry(50, 10, 10);
+    geometryPlant.scale(0.5, 1.5, 2);
+    geometryPlant.rotateX(Math.PI / 4);
+    // geometryPlant.rotate = -Math.PI / 2;
+    // geometryPlant.rotation.y = -Math.PI / 2;
+    const materialPlant = new THREE.MeshBasicMaterial({
+      color: 0xffff00,
+      side: THREE.DoubleSide,
+      map: new THREE.TextureLoader().load(this.modelConfig.barModel.map),
+    });
+    const plant = new THREE.Mesh(geometryPlant, materialPlant);
+    // plant.userData = { points: points };
+    // plant.position.set(points[0].x, points[0].y, points[0].z);
+    this.scene.add(plant);
   }
 
   /*

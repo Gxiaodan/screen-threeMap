@@ -38,6 +38,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.setDataKeys();
     this.colors = ["#fff", "#ff0"];
     this.colorIndex = 0;
+    this.moveIndex = 0;
     this.textures = [
       new THREE.TextureLoader().load(img1),
       new THREE.TextureLoader().load(img2),
@@ -74,12 +75,40 @@ export default class ThreeMapLightBar extends ThreeMap {
   doAnimate = throttle(() => {
     const ratio = this.colorIndex / this.flyLineConfig.pointLength;
     this.flyGroup1 &&
-      this.flyGroup1.children.forEach((d) => {
-        let moveLength = this.flyLineConfig.moveLength;
-        let moveIndex = (this.colorIndex * 3) % d.userData.positions.length;
-        d.geometry.setPositions(
-          d.userData.positions.slice(moveIndex, moveIndex + moveLength)
+      this.flyGroup1.children.forEach((d, index) => {
+        let points = d.userData.points;
+        let point = d.userData.points[this.moveIndex];
+        /*
+          面板移动？？？有问题
+          d.position.set(point.x, point.y, point.z);
+        */
+
+        /*
+         管道贴图移动动画
+        */
+        let moveLength =
+          (points.length * this.flyLineConfig.moveLength) /
+          this.flyLineConfig.pointLength;
+        const pointsMove = points.slice(
+          this.moveIndex,
+          this.moveIndex + moveLength
         );
+        const tubeMesh1 = this.createTube(
+          pointsMove,
+          this.modelConfig.barModel.map
+        );
+        tubeMesh1.userData = { index: index, points: points };
+        this.flyGroup1.remove(d);
+        this.flyGroup1.add(tubeMesh1);
+        // 纯线段飞线动画
+        // let moveLength = this.flyLineConfig.moveLength;
+        // let moveIndex = (this.colorIndex * 3) % d.userData.positions.length;
+        // d.geometry.setPositions(
+        //   d.userData.positions.slice(moveIndex, moveIndex + moveLength)
+        // );
+
+        // 管道+贴图飞线动画
+
         // let colorList = [];
         // let value = d.userData.value
         // let max = d.userData.max
@@ -107,6 +136,10 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.colorIndex++;
     if (this.colorIndex > this.flyLineConfig.pointLength - 1) {
       this.colorIndex = 0;
+    }
+    this.moveIndex = this.moveIndex + 10;
+    if (this.moveIndex > this.flyLineConfig.pointLength - 1) {
+      this.moveIndex = 0;
     }
     this.testMesh.rotateZ(Math.PI / 2);
     this.testMesh.rotateZ(0.05);
@@ -234,10 +267,35 @@ export default class ThreeMapLightBar extends ThreeMap {
    *
    * }
    */
+
+  // 创建管道
+  createTube(points, img) {
+    // 管道实现外边缘效果
+    const tubeCurve = new THREE.CatmullRomCurve3(points); // 曲线路径
+    const texture = new THREE.TextureLoader().load(img);
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping; // 每个都重复
+    const tubeMaterial = new THREE.MeshBasicMaterial({
+      // color: "#f5e669",
+      transparent: true,
+      opacity: 0.8,
+      map: texture,
+      polygonOffset: true,
+      side: THREE.DoubleSide,
+    });
+
+    // 创建管道
+    const tubeGeometry = new THREE.TubeGeometry(tubeCurve, 80, 0.2, 50, false); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
+
+    const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
+    return tubeMesh;
+  }
   drawFlyLine() {
-    const group = new THREE.Group();
-    const group1 = group.clone();
-    const group2 = group.clone();
+    const group = new THREE.Group(); // 底线
+    const group1 = group.clone(); // 移动点
+    const group2 = group.clone(); // 虚线
+    const group3 = group.clone(); // 移动立方块
+    const group4 = group.clone(); // 移动平面
+    const group5 = group.clone(); // plane作为底线
     group.name = "飞线";
     const maxValue = Math.max(...this.flyDatas.map((item) => item.value));
     this.flyDatas.forEach((d, index) => {
@@ -278,40 +336,46 @@ export default class ThreeMapLightBar extends ThreeMap {
         // color.setHSL(p.x / 100 + 0.1, (  p.y * 20 ) / 300, 0.7);
         // colorList.push( color.r, color.g, color.b );
       });
-      geometry.setPositions(positions);
-      geometry.setColors(
-        util.getRgb(this.flyLineConfig.colors, this.flyLineConfig.pointLength)
+
+      const pointsMove = points.slice(
+        0,
+        (points.length * this.flyLineConfig.moveLength) /
+          this.flyLineConfig.pointLength
       );
+      geometry.setPositions(positions);
+      // geometry.setColors(
+      //   util.getRgb(this.flyLineConfig.colors, this.flyLineConfig.pointLength)
+      // );
 
       const material = new LineMaterial({
-        dashed: false,
-        // color: 0xffffff,
-        vertexColors: true, // 是否使用顶点着色 THREE.NoColors THREE.VertexColors THREE.FaceColors
+        // dashed: true,
+        color: 0xff0000,
+        // vertexColors: true, // 是否使用顶点着色 THREE.NoColors THREE.VertexColors THREE.FaceColors
         transparent: true,
         linewidth: this.flyLineConfig.width,
         // linecap: "butt", // 线两端的样式
         // linejoin: "round", // 线连接节点的样式
         opacity: this.flyLineConfig.opacity,
-        lights: false, // 材质是否受到光照的影响
+        // lights: false, // 材质是否受到光照的影响
         // clipShadows: true,
         // shadowSide: THREE.DoubleSide
       });
       material.resolution.set(window.innerWidth, window.innerHeight);
-      // const mesh = new Line2(geometry, material);
+      const mesh = new Line2(geometry, material);
       // mesh.userData.value = value;
       // mesh.userData.max = maxValue;
 
       // 管道实现外边缘效果
       const tubeCurve = new THREE.CatmullRomCurve3(points); // 曲线路径
-      const tubeMaterial = new THREE.MeshBasicMaterial({
-        color: "#f5e669",
-        transparent: true,
-        opacity: 0.3,
-        polygonOffset: true,
-        // side: THREE.DoubleSide,
-      });
+      // const tubeMaterial = new THREE.MeshBasicMaterial({
+      //   color: "#f5e669",
+      //   transparent: true,
+      //   opacity: 0.3,
+      //   polygonOffset: true,
+      //   // side: THREE.DoubleSide,
+      // });
 
-      // 创建管道
+      // // 创建管道
       const tubeGeometry = new THREE.TubeGeometry(
         tubeCurve,
         80,
@@ -320,23 +384,27 @@ export default class ThreeMapLightBar extends ThreeMap {
         false
       ); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
 
-      const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
-      tubeMesh.name = "飞线" + index;
-      tubeMesh.userData = { index: index };
-      // group.add(tubeMesh);
+      const tubeMesh1 = this.createTube(
+        pointsMove,
+        this.modelConfig.barModel.map
+      );
+      // tubeMesh.name = "飞线" + index;
+      tubeMesh1.userData = { index: index, points: points };
+      // 添加运动线条
+      group1.add(tubeMesh1);
       var material111 = new THREE.MeshLambertMaterial({
         // color: 0x0000ff, //三角面颜色
         map: new THREE.TextureLoader().load(this.modelConfig.barModel.map),
       }); //材质对象
       var mesh111 = new THREE.Mesh(tubeGeometry, material111); //网格模型对象Mesh
-      group1.add(mesh111);
+      // group1.add(mesh111);
       // var geometry112 = new THREE.TubeGeometry(path, 100, 1, 25, false);
       var material112 = new THREE.MeshBasicMaterial({
         // color: 0x0000ff, //三角面颜色
         map: new THREE.TextureLoader().load(this.modelConfig.barModel.map),
+        opacity: 0.5,
       }); //材质对象
       var mesh112 = new THREE.Mesh(tubeGeometry, material112); //网格模型对象Mesh
-      this.scene.add(mesh112);
 
       const geometry1 = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
       geometry1.setColors(
@@ -351,64 +419,109 @@ export default class ThreeMapLightBar extends ThreeMap {
       material1.linewidth = this.flyLineConfig.lightLineWidth;
       const mesh1 = new Line2(geometry1, material1);
       mesh1.userData.positions = positions;
-      // group.add(mesh);
-      group1.add(mesh1);
+
+      const geometryBox = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+      const materialBox = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      const cube = new THREE.Mesh(geometryBox, materialBox);
+      cube.userData = { points: points };
+      cube.position.set(points[0].x, points[0].y, points[0].z);
+      group3.add(cube);
+
+      const geometryPlant = new THREE.PlaneGeometry(5, 5, 5);
+      geometryPlant.rotateX(Math.PI / 4);
+      // geometryPlant.scale.x = 20;
+      const materialPlant = new THREE.MeshBasicMaterial({
+        color: 0xffff00,
+        side: THREE.DoubleSide,
+        map: new THREE.TextureLoader().load(this.modelConfig.barModel.map),
+      });
+      const plant = new THREE.Mesh(geometryPlant, materialPlant);
+      plant.userData = { points: points };
+      plant.position.set(points[0].x, points[0].y, points[0].z);
+      group4.add(plant);
+
+      const groupL = group.clone(); // 平面拼接成的弧线
+      points.forEach((p, index) => {
+        if (index % 10 == 0) {
+          plant.position.set(p.x, p.y, p.z);
+          let plantC = plant.clone();
+          plantC.geometry.scale = 4;
+          plantC.geometry.rotateX(Math.PI / 4);
+          plantC.geometry.rotateY(Math.PI / 4);
+          plantC.geometry.rotateZ(Math.PI / 4);
+          groupL.add(plantC);
+        }
+      });
+      group5.add(groupL);
+
+      group.add(mesh);
+      // group.add(mesh112);
+      // group1.add(mesh1);
 
       // 虚线练习
       const lineGeometry = new THREE.BufferGeometry();
-      const points01 = [];
+      // const points01 = [];
 
-      const point = new THREE.Vector3();
-      const direction = new THREE.Vector3();
+      // const point = new THREE.Vector3();
+      // const direction = new THREE.Vector3();
 
-      for (let i = 0; i < 6; i++) {
-        direction.x += Math.random() - 0.5;
-        direction.y += Math.random() - 0.5;
-        direction.z += Math.random() - 0.5;
-        // direction.normalize().multiplyScalar(10);
-        direction.normalize().multiplyScalar(3);
+      // for (let i = 0; i < 6; i++) {
+      //   direction.x += Math.random() - 0.5;
+      //   direction.y += Math.random() - 0.5;
+      //   direction.z += Math.random() - 0.5;
+      //   // direction.normalize().multiplyScalar(10);
+      //   direction.normalize().multiplyScalar(3);
 
-        point.add(direction);
-        points01.push(point.x, point.y, point.z);
-      }
+      //   point.add(direction);
+      //   points01.push(point.x, point.y, point.z);
+      // }
 
       lineGeometry.setAttribute(
         "position",
-        new THREE.Float32BufferAttribute(points01, 3)
+        // new THREE.Float32BufferAttribute(points01, 3)
+        new THREE.Float32BufferAttribute(points1, 3)
       );
       let object;
       const lineMaterial = new THREE.LineBasicMaterial({
-        // color: Math.random() * 0xffffff,
-        color: "#ff0",
+        color: "#f00",
+        transparent: true,
+        linewidth: 5,
       });
       object = new THREE.LineSegments(lineGeometry, lineMaterial);
+      object.material.opacity = 0.1;
       // object.position.x = Math.random() * 400 - 200;
       // object.position.y = Math.random() * 400 - 200;
       // object.position.z = Math.random() * 400 - 200;
       // object.rotateX = Math.random() + 1.5;
       // object.rotateY = Math.random() + 1.5;
       // object.rotateZ = Math.random() + 1.5;
-      // group2.add(object);
+      group2.add(object);
     });
     this.flyGroup = group;
     this.flyGroup1 = group1;
+    // this.flyGroup1 = group3;
+    // this.flyGroup1 = group4;
+    // this.flyGroup1 = group5;
     // this.flyGroup.position.z = this.modelConfig.height + 0.1;
     this.flyGroup.position.z = 0.1;
     this.flyGroup1.position.z = 0.05;
+    // 添加底线
     this.scene.add(this.flyGroup);
+    // 添加移动点
     this.scene.add(this.flyGroup1);
+    // 添加虚线
     // this.scene.add(group2);
     // this.selectedObjects.push(this.sflyGroup);
     // this.outlinePass.selectedObjects = this.selectedObjects;
     // this.composer.render();
 
-    var geometry = new THREE.BoxGeometry(20, 20, 20); //创建一个立方体几何对象Geometry
-    // 线条渲染模式
-    var material = new THREE.LineBasicMaterial({
-      color: 0xff0000, //线条颜色
-    }); //材质对象
-    // 创建线模型对象   构造函数：Line、LineLoop、LineSegments
-    var line = new THREE.Line(geometry, material); //线条模型对象
+    // var geometry = new THREE.BoxGeometry(20, 20, 20); //创建一个立方体几何对象Geometry
+    // // 线条渲染模式
+    // var material = new THREE.LineBasicMaterial({
+    //   color: 0xff0000, //线条颜色
+    // }); //材质对象
+    // // 创建线模型对象   构造函数：Line、LineLoop、LineSegments
+    // var line = new THREE.Line(geometry, material); //线条模型对象
     // this.scene.add(line);
 
     var geometry10 = new THREE.BoxGeometry(20, 20, 20);
