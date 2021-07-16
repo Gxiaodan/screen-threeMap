@@ -108,9 +108,9 @@ export default class ThreeMapLightBar extends ThreeMap {
     if (this.colorIndex > this.flyLineConfig.pointLength - 1) {
       this.colorIndex = 0;
     }
-    // this.testMesh.rotateZ(Math.PI / 2);
-    // this.testMesh.rotateZ(0.05);
-    // this.testMesh.rotation.z = (this.colorIndex * Math.PI) / 5;
+    this.testMesh.rotateZ(Math.PI / 2);
+    this.testMesh.rotateZ(0.05);
+    this.testMesh.rotation.z = (this.colorIndex * Math.PI) / 5;
   }, this.animateConfig.time);
 
   /**
@@ -177,32 +177,32 @@ export default class ThreeMapLightBar extends ThreeMap {
       sixLineGroup.add(this.drawSixLineLoop(x, y, z, i, 1));
       sixLineGroup.add(this.drawSixLineLoop(x, y, z, i, 0.7));
 
-      // const shape = new THREE.Shape();
-      // shape.moveTo(0, 0);
-      // shape.lineTo(0, 5);
-      // shape.lineTo(5, 5);
-      // shape.lineTo(5, 0);
-      // shape.lineTo(0, 0);
+      const shape = new THREE.Shape();
+      shape.moveTo(0, 0);
+      shape.lineTo(0, 5);
+      shape.lineTo(5, 5);
+      shape.lineTo(5, 0);
+      shape.lineTo(0, 0);
 
-      // const geometry = new THREE.ExtrudeGeometry(shape, {
-      //   amount: 1, // 拉伸长度，默认100
-      //   bevelEnabled: false, // 对挤出的形状应用是否斜角
-      //   depth: 2,
-      // });
-      // var img2 = "./mapLine.png";
-      // const material0 = new THREE.MeshPhongMaterial({
-      //   color: "#f00",
-      //   transparent: true,
-      //   opacity: 1,
-      // });
-      // const material1 = new THREE.MeshBasicMaterial({
-      //   map: new THREE.TextureLoader().load(img2),
-      //   transparent: true,
-      //   opacity: 1,
-      //   side: THREE.DoubleSide,
-      // });
-      // this.testMesh = new THREE.Mesh(geometry, [material0, material1]);
-      // this.testMesh.position.set(0, 10, 5);
+      const geometry = new THREE.ExtrudeGeometry(shape, {
+        amount: 1, // 拉伸长度，默认100
+        bevelEnabled: false, // 对挤出的形状应用是否斜角
+        depth: 2,
+      });
+      var img2 = "./mapLine.png";
+      const material0 = new THREE.MeshPhongMaterial({
+        color: "#f00",
+        transparent: true,
+        opacity: 1,
+      });
+      const material1 = new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load(img2),
+        transparent: true,
+        opacity: 1,
+        side: THREE.DoubleSide,
+      });
+      this.testMesh = new THREE.Mesh(geometry, [material0, material1]);
+      this.testMesh.position.set(0, 0, 0);
 
       // const geometry1 = new THREE.SphereGeometry(3, 3, 3);
       // let mesh = new THREE.Mesh(geometry1, material0);
@@ -297,9 +297,9 @@ export default class ThreeMapLightBar extends ThreeMap {
         // shadowSide: THREE.DoubleSide
       });
       material.resolution.set(window.innerWidth, window.innerHeight);
-      const mesh = new Line2(geometry, material);
-      mesh.userData.value = value;
-      mesh.userData.max = maxValue;
+      // const mesh = new Line2(geometry, material);
+      // mesh.userData.value = value;
+      // mesh.userData.max = maxValue;
 
       // 管道实现外边缘效果
       const tubeCurve = new THREE.CatmullRomCurve3(points); // 曲线路径
@@ -312,7 +312,13 @@ export default class ThreeMapLightBar extends ThreeMap {
       });
 
       // 创建管道
-      const tubeGeometry = new THREE.TubeGeometry(tubeCurve, 80, 1, 50, false); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
+      const tubeGeometry = new THREE.TubeGeometry(
+        tubeCurve,
+        80,
+        0.05,
+        50,
+        false
+      ); // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
 
       const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
       tubeMesh.name = "飞线" + index;
@@ -323,29 +329,29 @@ export default class ThreeMapLightBar extends ThreeMap {
         map: new THREE.TextureLoader().load(this.modelConfig.barModel.map),
       }); //材质对象
       var mesh111 = new THREE.Mesh(tubeGeometry, material111); //网格模型对象Mesh
-      // group1.add(mesh111);
+      group1.add(mesh111);
       // var geometry112 = new THREE.TubeGeometry(path, 100, 1, 25, false);
       var material112 = new THREE.MeshBasicMaterial({
         // color: 0x0000ff, //三角面颜色
         map: new THREE.TextureLoader().load(this.modelConfig.barModel.map),
       }); //材质对象
       var mesh112 = new THREE.Mesh(tubeGeometry, material112); //网格模型对象Mesh
-      // this.scene.add(mesh112);
+      this.scene.add(mesh112);
 
       const geometry1 = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
       geometry1.setColors(
         util.getRgb(
-          ["rgb(255, 255, 255)", "rgb(255, 0, 0)", "rgb(0,255, 0)"],
+          ["rgb(255, 255, 255)", "rgb(0,0, 255)"],
           this.flyLineConfig.moveLength
         )
       );
-      geometry1.setPositions(positions.splice(0, 30));
+      // geometry1.setPositions(positions.splice(0, 30));
       let material1 = material.clone();
-      material1.opacity = 1;
+      material1.opacity = 0.5;
       material1.linewidth = this.flyLineConfig.lightLineWidth;
       const mesh1 = new Line2(geometry1, material1);
       mesh1.userData.positions = positions;
-      group.add(mesh);
+      // group.add(mesh);
       group1.add(mesh1);
 
       // 虚线练习

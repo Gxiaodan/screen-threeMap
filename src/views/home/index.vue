@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <video class="bgvid" id="bgvid" autoplay muted loop>
+    <!-- <video class="bgvid" id="bgvid" autoplay muted loop>
       <source src="@/assets/img/bg.webm" type="video/webm" />
-    </video>
+    </video> -->
     <div class="main-con">
       <div class="wheel-con">
         <div
@@ -234,12 +234,12 @@ export default {
           colors: ["rgb(241,241,122)", "rgb(241,241,122)", "rgb(255,255,0)"],
           pointLength: 90,
           moveLength: 60,
-          width: 2,
-          lightLineWidth: 3,
+          width: 1,
+          lightLineWidth: 1,
           opacity: 1,
         },
         animateConfig: {
-          time: 5,
+          time: 1,
         },
       });
 
